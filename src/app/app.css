@@ -1,0 +1,38 @@
+/* App-level behaviour that the design system's own base.css does not cover.
+   Everything visual still comes from the tokens. */
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* Skip link — the ledger has a long index rail, so keyboard users get a way past it. */
+.okwe-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--surface-ink);
+  color: var(--text-inverse);
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  padding: var(--space-4) var(--space-6);
+  box-shadow: none;
+}
+.okwe-skip:focus {
+  left: var(--page-margin);
+  top: var(--space-3);
+}
+
+/* The design system underlines every <a>. Register entries and nav items are
+   whole blocks, not running text, so they opt out. */
+a.okwe-block-link,
+a.okwe-block-link:hover {
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+}

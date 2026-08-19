@@ -1,0 +1,156 @@
+.page {
+  min-height: 100vh;
+  background: var(--surface-page);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  font-family: var(--font-ui);
+}
+
+.head { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.code {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--size-2xl);
+  letter-spacing: var(--tracking-heading);
+  color: var(--text-primary);
+}
+
+.intro {
+  font-family: var(--font-read);
+  font-size: var(--size-sm);
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+/* Working area: the deck on the left, the copy editor in the annotation margin. */
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-9);
+  align-items: start;
+}
+
+.deck { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+
+/* Each slide is selectable: a 3px sulphur rule marks the one being edited. */
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  border-top: var(--rule-thick) solid transparent;
+  padding-top: var(--space-3);
+  transition: border-top-color var(--duration-snap) var(--ease-mech);
+}
+.slot:hover { border-top-color: var(--rule-quiet); }
+.slotOn { border-top-color: var(--rule-mark); }
+
+.slotMeta {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  letter-spacing: var(--tracking-call);
+  text-transform: uppercase;
+  color: var(--text-quiet);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.editor {
+  position: sticky;
+  top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  border-left: var(--rule-thin) solid var(--rule-ink);
+  padding-left: var(--space-6);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sectionRule {
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+}
+
+.actions { display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center; }
+
+.status {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  letter-spacing: var(--tracking-call);
+  color: var(--text-muted);
+}
+.statusError { color: var(--status-danger); }
+
+.foot {
+  border-top: var(--rule-thin) solid var(--rule-ink);
+  padding-top: var(--space-5);
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  letter-spacing: var(--tracking-call);
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+.foot a { text-decoration: none; box-shadow: none; color: var(--text-secondary); }
+.foot a:hover { box-shadow: inset 0 -3px 0 var(--rule-mark); }
+
+/* Offscreen staging: every slide laid out at full canvas width so the exporter
+   can capture it. Laid out (capture needs real geometry), never visible. */
+.stage {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  width: 1080px;
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .editor {
+    position: static;
+    border-left: 0;
+    border-top: var(--rule-thick) solid var(--rule-ink);
+    padding-left: 0;
+    padding-top: var(--space-6);
+  }
+}

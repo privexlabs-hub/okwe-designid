@@ -1,0 +1,16 @@
+/* Motion is mechanical: a stamp landing, a counter dropping into a pit, a card
+   pulled from a drawer. Short, flat, and where something is counted, stepped.
+   Nothing eases in slowly, nothing bounces, nothing scales up from nothing. */
+:root{
+--duration-snap:90ms;
+--duration-set:140ms;
+--duration-stamp:200ms;
+--duration-count:520ms;
+--ease-mech:cubic-bezier(0,.72,.16,1);
+--ease-flat:linear;
+--ease-count:steps(10,end);
+--transition-control:background-color var(--duration-snap) var(--ease-mech),color var(--duration-snap) var(--ease-mech),border-color var(--duration-snap) var(--ease-mech),box-shadow var(--duration-snap) var(--ease-mech);
+--transition-surface:opacity var(--duration-set) var(--ease-mech),transform var(--duration-set) var(--ease-mech);
+--travel-nudge:2px;--travel-slide:4px;--travel-drawer:12px;
+}
+@media (prefers-reduced-motion:reduce){:root{--duration-snap:0ms;--duration-set:0ms;--duration-stamp:0ms;--duration-count:0ms}}

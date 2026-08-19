@@ -1,0 +1,158 @@
+# Okwe Knowledge
+
+The publishing operating system for **Okwe Knowledge** — a frontend-only Next.js
+app ported from the Claude Design project
+[`02418c77-e7a2-445f-86ef-3e457e131818`](https://claude.ai/design/p/02418c77-e7a2-445f-86ef-3e457e131818).
+
+Two people · three pillars · one register.
+
+```bash
+npm install
+npm run dev          # http://localhost:3000
+npm run build        # static export → out/
+npm start            # serve the export on :3000
+```
+
+## What this is
+
+The source project is a complete brand and publishing system authored as Design
+Canvas HTML plus React JSX, which only runs inside Claude Design's canvas runtime
+(`support.js`, `<x-dc>`, `<x-import>`, `<sc-for>`). This repository is that system
+rebuilt as a standalone static site: same design system, same copy, same
+notation — no runtime, no backend, no third-party requests.
+
+| Route | Ported from | What it does |
+| --- | --- | --- |
+| `/` | `Okwe Knowledge.dc.html` | The index register — six entries, each opened by a 3px ink rule that turns sulphur on hover. |
+| `/playbook` | `Playbook.dc.html` + `playbook/docs.js` | The six brand documents, with working deep links and cross-document search. |
+| `/post-editor` | `post-editor/*.jsx` | The production tool: template → copy → quality gate → **real** PNG / JPG / PDF / SVG / ZIP export. |
+| `/social-kit` | `social-kit/SocialKit.jsx` | Eight profiles with tier filtering and copy-to-clipboard bios, plus the template set at true canvas sizes. |
+| `/content-proofs` | `content-proofs/Proofs.jsx` | The twelve proofs, with a working plate-mode switch and a jump index. |
+| `/carousel` | `carousel/SocialCarousel.dc.html` | The six-part set at 1080×1350, editable in place and exportable. |
+| `/design-system` | `_ds/…/_ds_bundle.js` | Every component on one specimen sheet, so consistency is checked rather than assumed. Includes the five colour ramps (hex read back from the live custom properties), the type scale, a width-contrast specimen, and a plate-mode block. |
+
+## How it is built
+
+**Next.js 15 App Router · React 19 · TypeScript strict · `output: "export"`.**
+No API routes, no server actions, no middleware, no ISR, no `next/image`
+optimizer — it is a pure static site that runs from any file server.
+
+**No Tailwind.** The design system is token- and rule-based; its own CSS custom
+properties are the styling layer. Tailwind's defaults (radii, shadows, its own
+scale) would fight a system whose whole position is *square corners, rules not
+boxes, no elevation*.
+
+```
+src/
+  app/                    one folder per route
+  design-system/
+    tokens/*.css          the 8 token files, copied verbatim from the source
+    styles.css            the single entry point
+    brand/geometry.ts     the mark, as numbers — one source of truth
+    components/           29 components ported from the bundle
+  content/                copy and data, separated from layout
+  lib/export.ts           client-side PNG / PDF / ZIP
+public/assets/            fonts and logo — see public/assets/README.md
+scripts/                  asset generation and verification
+```
+
+### The design system
+
+All 29 components were **ported by transcription** from the design system
+bundle, which ships unminified. Every style value, ratio and CSS variable is the
+source's own; nothing was redesigned. Two Design Canvas runtime behaviours were
+reproduced after reading `support.js` rather than guessing at them:
+
+- `style-hover="…"` compiles to a generated CSS class carrying the declaration
+  under a `:hover` selector — a real CSS rule, so it is a real CSS rule here,
+  not React state.
+- `sc-for list as` is a plain `.map()`.
+
+### Typography is the identity
+
+The brand's owned behaviour is **width contrast**: headlines in Archivo at
+118–125% width against Martian Mono at 87.5%. That only works with genuine
+variable fonts, so the build refuses to ship a static instance —
+`scripts/fetch-fonts.mjs` reads the `fvar` table of every file it downloads and
+fails if the required axis is missing, and `npm run verify` asserts in a real
+browser that the axis is actually applied.
+
+All three families are self-hosted from `public/assets/fonts`. Nothing is
+fetched from Google at runtime.
+
+## Verification
+
+Everything runs against the **production static export**, not the dev server.
+
+```bash
+npm run build
+npx serve out -l 4321
+npm run verify        # 47 checks across three suites
+```
+
+- `scripts/verify-app.mjs` — every route renders, no console errors, **zero
+  third-party requests**, all three fonts genuinely loaded (`document.fonts.check`),
+  the width axis measurably applied, and the index's deep link into the playbook resolves.
+- `scripts/verify-interactions.mjs` — real state changes: hover and focus rules,
+  keyboard order, `prefers-reduced-motion`, tier filtering, plate mode repainting
+  the ground, and the quality gate's score actually dropping on banned vocabulary.
+- `scripts/verify-export.mjs` — clicks the real export buttons and checks the
+  downloaded files: six PNGs at true 1080×1350, non-blank rasters with the
+  webfont embedded, and a ZIP containing every slide plus the combined PDF.
+
+`npm run shots` screenshots every route for visual review.
+
+## Known limits
+
+- **The PDF is raster.** Each page is an image of the slide at true canvas size,
+  not selectable or searchable text. A vector PDF would need the type re-laid-out
+  by a PDF engine.
+- **Image upload and template persistence are not implemented.** The source
+  prototype listed both as unbuilt; only its export gap was filled.
+- **No photography exists.** The source shipped none, so image wells are labelled
+  placeholders, as they are upstream.
+- **`ThumbnailCard` clips long titles.** Its heading is a fixed `104 * u` with no
+  clamp inside a fixed 16:9 box, so a four-line title overruns the card and pushes
+  `question` out of view. This is the source's own geometry, left as-is; the
+  `/design-system` sheet shows a deliberately labelled failing specimen next to two
+  that fit, rather than hiding it.
+- The seed mark is the design system's own proposal, not a client-supplied logo —
+  see the "Open items" section of the source `readme.md`.
+
+## Deviations from the source
+
+Deliberate, and each one is commented at the site of the change:
+
+1. **`CarouselSlide` and `ThumbnailCard` headings had no explicit colour.** The
+   design system's `base.css` sets `h2 { color: var(--text-primary) }`, and an
+   element rule beats an inherited one — so on a cyanotype plate the cover
+   headline rendered dark-on-dark and disappeared. Both now pick their colour
+   from `inverse`, as every sibling element in those components already did.
+2. **`pick()` in the post editor set `theme: k === "chalk"`** — comparing a slide
+   *kind* to a *theme* name, always false, yielding `theme: undefined`. Corrected
+   to the literal `"chalk"`.
+3. **The quality gate referenced `var(--fact)`,** which is not a defined token.
+   Corrected to `var(--class-fact)`.
+4. **Export is implemented.** The source README describes it as "one export
+   library away"; that gap is filled rather than mocked.
+5. **The playbook rail logo is `size={15}`, not `17`** — at Archivo's real metrics
+   the 125%-width wordmark overran the 280px rail and was clipped by its scroll
+   container.
+6. **The radio is round again.** The bundle sets `borderRadius: 0` on both the radio
+   box and its dot, making it visually identical to a checkbox. The design system
+   contradicts that in two places — its readme ("Circles exist only for the seed mark
+   and the radio dot") and the comment in `Seeds.tsx` — and ships `--radius-circle`
+   solely for those two cases. Followed the stated rule.
+
+Checked, and deliberately *not* changed:
+
+- **`Dialog`'s shadow** is not a violation. `elevation.css` says two exceptions exist,
+  both functional, and `--shadow-dialog` is one of them: "a modal must detach from the page".
+- **`Logo` ignores `[data-theme="plate"]`** because its colours come from `tone`, which
+  is the component's declared API — not a bug, just a prop the caller must pass.
+
+### Contract check
+
+The design system ships `_adherence.oxlintrc.json`, an oxlint config encoding every
+component's declared props and enum values. The port was validated against it: all 24
+constrained components match, including all 8 canvas sizes and all 6 canvas themes.

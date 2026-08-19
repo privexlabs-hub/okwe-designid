@@ -1,0 +1,63 @@
+/* ============================================================================
+   OKWE TYPOGRAPHY — three faces, three jobs, and one owned behaviour:
+   WIDTH CONTRAST. Headlines are set in Archivo at EXPANDED width (112–125%);
+   labels and figures in Martian Mono at NARROW width (87.5%). The extreme
+   width difference between a headline and its call number is the typographic
+   signature — recognisable before any colour or mark is visible.
+   ========================================================================== */
+:root{
+--font-display:"Archivo","Archivo Expanded",Helvetica,sans-serif; /* headlines, at expanded width */
+--font-read:"Literata",Georgia,serif;                              /* long-form reading */
+--font-ui:"Archivo",Helvetica,sans-serif;                          /* interface, at normal width */
+--font-mono:"Martian Mono","IBM Plex Mono",ui-monospace,monospace; /* call numbers, labels, figures, tallies */
+
+/* Width axis — the identity lives here. */
+--stretch-display:118%;   /* headlines and covers */
+--stretch-display-max:125%; /* one-line covers, thumbnails */
+--stretch-ui:100%;
+--stretch-mono:87.5%;     /* labels, call numbers */
+--stretch-figure:100%;    /* oversized numerals stay normal width */
+
+--weight-light:300;--weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;--weight-black:800;
+
+/* Scale. Two ranges: a reading range (13–25px) and a register range (31–160px).
+   Nothing lives between 25 and 31 — the jump is deliberate: documents are either
+   being read or being catalogued. */
+--size-3xs:11px;--size-2xs:12px;--size-xs:13px;--size-sm:15px;--size-md:17px;--size-lg:20px;--size-xl:25px;
+--size-2xl:31px;--size-3xl:39px;--size-4xl:49px;--size-5xl:62px;--size-6xl:78px;--size-7xl:98px;--size-8xl:124px;--size-9xl:160px;
+
+--leading-stamp:0.92;--leading-tight:1.0;--leading-heading:1.08;--leading-ui:1.3;--leading-body:1.6;--leading-loose:1.75;
+--tracking-display:-0.03em;   /* expanded width needs negative tracking to stay a block */
+--tracking-heading:-0.015em;
+--tracking-body:0.005em;
+--tracking-label:0.14em;      /* mono labels are widely tracked — the register voice */
+--tracking-call:0.08em;
+--measure-body:62ch;--measure-narrow:38ch;--measure-note:30ch;
+
+/* Composed roles. Apply font-stretch alongside these (the shorthand omits it). */
+--type-cover:var(--weight-semibold) var(--size-7xl)/var(--leading-stamp) var(--font-display);
+--type-h1:var(--weight-semibold) var(--size-4xl)/var(--leading-heading) var(--font-display);
+--type-h2:var(--weight-semibold) var(--size-2xl)/var(--leading-heading) var(--font-display);
+--type-h3:var(--weight-semibold) var(--size-lg)/var(--leading-ui) var(--font-ui);
+--type-h4:var(--weight-semibold) var(--size-sm)/var(--leading-ui) var(--font-ui);
+--type-lede:var(--weight-regular) var(--size-lg)/var(--leading-body) var(--font-read);
+--type-body:var(--weight-regular) var(--size-md)/var(--leading-body) var(--font-read);
+--type-body-sm:var(--weight-regular) var(--size-sm)/var(--leading-body) var(--font-read);
+--type-ui:var(--weight-medium) var(--size-sm)/var(--leading-ui) var(--font-ui);
+--type-ui-sm:var(--weight-medium) var(--size-xs)/var(--leading-ui) var(--font-ui);
+--type-caption:var(--weight-regular) var(--size-xs)/var(--leading-body) var(--font-read);
+--type-label:var(--weight-semibold) var(--size-3xs)/1.1 var(--font-mono);
+--type-call:var(--weight-medium) var(--size-2xs)/1.1 var(--font-mono);
+--type-data:var(--weight-medium) var(--size-xs)/1.25 var(--font-mono);
+--type-figure:var(--weight-medium) var(--size-6xl)/var(--leading-stamp) var(--font-mono);
+--type-figure-xl:var(--weight-medium) var(--size-8xl)/var(--leading-stamp) var(--font-mono);
+--type-quote:var(--weight-light) italic var(--size-2xl)/var(--leading-heading) var(--font-read);
+}
+
+/* Okwe typographic conventions, as classes so they cannot drift. */
+.okwe-label{font:var(--type-label);font-stretch:var(--stretch-mono);letter-spacing:var(--tracking-label);text-transform:uppercase}
+.okwe-call{font:var(--type-call);font-stretch:var(--stretch-mono);letter-spacing:var(--tracking-call);text-transform:uppercase}
+.okwe-figure{font:var(--type-figure);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.okwe-display{font-family:var(--font-display);font-stretch:var(--stretch-display);letter-spacing:var(--tracking-display);font-weight:var(--weight-semibold)}
+.okwe-question{font:var(--type-lede);font-style:italic;color:var(--text-secondary)}
+.okwe-source{font:var(--type-data);color:var(--text-muted);letter-spacing:var(--tracking-call)}

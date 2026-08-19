@@ -1,0 +1,21 @@
+/* The long-form prose stylesheet, copied verbatim from Playbook.dc.html.
+   These are the playbook's own rules for setting a document: expanded Archivo
+   headings, mono subheads, a 62ch measure, sulphur-ruled quotations. */
+.okwe-doc{font-family:'Literata',serif;font-size:17px;line-height:1.6;color:var(--text-body,#0B2B3A)}
+.okwe-doc h1{font-family:'Archivo',sans-serif;font-stretch:118%;font-weight:600;font-size:34px;line-height:1.04;letter-spacing:-0.02em;color:var(--text-primary,#05161F);margin:0 0 28px;max-width:24ch}
+.okwe-doc h2{font-family:'Archivo',sans-serif;font-stretch:118%;font-weight:600;font-size:25px;line-height:1.1;letter-spacing:-0.015em;color:var(--text-primary,#05161F);border-top:3px solid var(--rule-ink,#05161F);padding-top:14px;margin:44px 0 14px}
+.okwe-doc h3{font-family:'Martian Mono',monospace;font-stretch:87.5%;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary,#123F52);margin:32px 0 10px}
+.okwe-doc p{margin:0 0 14px;max-width:62ch;text-wrap:pretty}
+.okwe-doc ul,.okwe-doc ol{margin:0 0 16px;padding-left:22px;max-width:62ch}
+.okwe-doc li{margin:0 0 7px}
+.okwe-doc table{border-collapse:collapse;margin:8px 0 20px;font-size:14px;line-height:1.45}
+.okwe-doc th{font-family:'Martian Mono',monospace;font-stretch:87.5%;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;text-align:left;color:var(--text-primary,#05161F);border-bottom:3px solid var(--rule-ink,#05161F);padding:6px 20px 6px 0}
+.okwe-doc td{border-bottom:0.5px solid var(--rule-quiet,#C3CAC5);padding:8px 20px 8px 0;vertical-align:top}
+.okwe-doc pre{font-family:'Martian Mono',monospace;font-stretch:87.5%;font-size:12px;line-height:1.6;background:var(--surface-inset,#D8DDD9);border-left:3px solid var(--rule-ink,#05161F);padding:16px 20px;overflow-x:auto;margin:8px 0 20px}
+.okwe-doc code{font-family:'Martian Mono',monospace;font-stretch:87.5%;font-size:0.82em;background:var(--surface-inset,#D8DDD9);padding:1px 5px}
+.okwe-doc blockquote{font-style:italic;border-left:3px solid var(--rule-mark,#E3CB2A);margin:0 0 16px;padding:2px 0 2px 18px;max-width:58ch}
+.okwe-doc hr{border:0;border-top:1px solid var(--rule-ink,#05161F);margin:32px 0}
+.okwe-doc strong{color:var(--text-primary,#05161F)}
+
+/* Wide tables must scroll inside the field rather than widening the page. */
+.okwe-doc table{display:block;overflow-x:auto;max-width:100%}

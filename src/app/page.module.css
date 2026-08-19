@@ -1,0 +1,81 @@
+/* The index register.
+   The source document expressed hover with Design Canvas's `style-hover`
+   attribute, which its runtime compiles into a generated CSS class carrying the
+   declaration under a :hover selector. That is a real CSS rule, not JS state,
+   so it is reproduced here as a real CSS rule. */
+
+.entry {
+  display: grid;
+  grid-template-columns: var(--rail-index) 1fr var(--rail-margin);
+  gap: var(--space-7);
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding: var(--space-6) 0 var(--space-7);
+  transition: border-top-color var(--duration-snap) var(--ease-mech);
+}
+.entry:hover,
+.entry:focus-visible {
+  border-top-color: var(--rule-mark);
+}
+
+.num {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  padding-top: var(--space-2);
+}
+
+.entryBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.entryTitle {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: var(--weight-semibold);
+  font-size: 29px;
+  line-height: 1.04;
+  letter-spacing: var(--tracking-heading);
+  color: var(--text-primary);
+}
+
+.entryText {
+  font-family: var(--font-read);
+  font-size: var(--size-sm);
+  line-height: 1.55;
+  color: var(--text-body);
+  max-width: 58ch;
+}
+
+.entryMeta {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-quiet);
+  line-height: 1.9;
+  padding-top: 6px;
+}
+
+/* Below the ledger's natural width the three columns cannot hold their measure,
+   so the rail and the annotation margin fold under the field rather than
+   squeezing. The rules stay; only the columns collapse. */
+@media (max-width: 900px) {
+  .entry {
+    grid-template-columns: 64px 1fr;
+    gap: var(--space-5);
+  }
+  .entryMeta {
+    grid-column: 2;
+    padding-top: var(--space-2);
+  }
+  .entryTitle {
+    font-size: var(--size-xl);
+  }
+}

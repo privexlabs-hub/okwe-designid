@@ -1,0 +1,12 @@
+/* Okwe has no elevation system. Information is separated by rules and by ground,
+   not by height. Two exceptions exist, both functional: a modal must detach from
+   the page, and a photograph needs its type protected. */
+:root{
+--shadow-none:none;
+--shadow-dialog:0 32px 64px -32px rgba(5,22,31,.55);
+--overlay-scrim:rgba(5,22,31,.72);
+--blur-scrim:none;                      /* no frosted glass anywhere */
+--protection-plate:linear-gradient(to top,rgba(5,22,31,.88) 0%,rgba(5,22,31,.55) 46%,rgba(5,22,31,.06) 100%);
+--frame-ink:var(--rule-thick) solid var(--rule-ink);   /* the framing device: a 3px ink frame */
+--frame-mark:var(--rule-thick) solid var(--rule-mark);
+}

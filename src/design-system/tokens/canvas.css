@@ -1,0 +1,19 @@
+:root{
+/* Publishing canvases. Every asset is authored at one of these sizes. */
+--canvas-square:1080px;
+--canvas-portrait-w:1080px;--canvas-portrait-h:1350px;
+--canvas-story-w:1080px;--canvas-story-h:1920px;
+--canvas-landscape-w:1600px;--canvas-landscape-h:900px;
+--canvas-thumb-w:1280px;--canvas-thumb-h:720px;
+--canvas-slide-w:1920px;--canvas-slide-h:1080px;
+--canvas-banner-w:1500px;--canvas-banner-h:500px;
+--canvas-report-w:2480px;--canvas-report-h:3508px;  /* A4 at 300dpi */
+
+/* The canvas is a ledger too: an index band at the top, a content field, and a
+   register line at the foot. Margins are proportional to the short edge. */
+--canvas-margin:5.5%;
+--canvas-margin-story:8%;
+--canvas-index-band:11%;   /* call number, class stamp, date */
+--canvas-register:8%;      /* wordmark, tally, destination */
+--canvas-baseline:1080;
+}

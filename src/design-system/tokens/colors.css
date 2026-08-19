@@ -1,0 +1,123 @@
+/* ============================================================================
+   OKWE COLOUR — five materials, each with a reason to exist.
+   CHALK      mineral ground. Cool, faintly green-grey. The ground of a working
+              document, not "premium cream". Never #FFFFFF, never warm off-white.
+   CYANOTYPE  the primary ink. A blue-black with a cyan-green cast, taken from the
+              cyanotype/blueprint — the drawing that explains how a system works.
+              Not navy (no violet), not academic blue (not bright).
+   SULPHUR    the signature. A mineral yellow: a traded bulk commodity, the ferric
+              chemistry of a blueprint, and the colour of an annotation. It marks
+              and counts; it never fills a surface or carries text.
+   VERDIGRIS  oxidised copper — the metal that wires an economy, changed by exposure.
+              Systems diagrams and the second data series.
+   STAMP      the ink of paperwork authority. Rationed to corrections, opinion and
+              the stamp device. Never a brand-wide red.
+   ========================================================================== */
+:root{
+--chalk-50:#F1F3F1;--chalk-100:#E6EAE7;--chalk-200:#D8DDD9;--chalk-300:#C3CAC5;--chalk-400:#A6AFA9;--chalk-500:#8A948E;
+--cyanotype-900:#05161F;--cyanotype-800:#0B2B3A;--cyanotype-700:#123F52;--cyanotype-600:#1A5570;--cyanotype-500:#2A6E8C;--cyanotype-400:#4E90A9;--cyanotype-300:#86B6C7;--cyanotype-200:#BDD5DE;--cyanotype-100:#DEEAEF;
+--sulphur-600:#8F7F14;--sulphur-500:#B9A419;--sulphur-400:#E3CB2A;--sulphur-300:#EEDD6A;--sulphur-100:#F7F0C4;
+--verdigris-700:#124A44;--verdigris-600:#1E6E63;--verdigris-500:#2C8C7E;--verdigris-300:#7FB8AE;--verdigris-100:#DCEAE7;
+--stamp-700:#7E1620;--stamp-600:#A8202C;--stamp-400:#C9505A;--stamp-100:#F3D9DB;
+
+/* ---- Surfaces. Three grounds only: chalk, ink, and one plate colour. ---- */
+--surface-page:var(--chalk-100);
+--surface-field:var(--chalk-50);
+--surface-inset:var(--chalk-200);
+--surface-ink:var(--cyanotype-900);
+--surface-ink-soft:var(--cyanotype-800);
+--surface-plate:var(--cyanotype-700);
+--surface-mark:var(--sulphur-400);
+--surface-system:var(--verdigris-700);
+
+/* ---- Text ---- */
+--text-primary:var(--cyanotype-900);
+--text-body:var(--cyanotype-800);
+--text-secondary:var(--cyanotype-700);
+--text-muted:var(--cyanotype-600);
+--text-quiet:var(--chalk-500);
+--text-inverse:var(--chalk-50);
+--text-inverse-muted:var(--cyanotype-300);
+--text-mark:var(--sulphur-400);
+--text-link:var(--cyanotype-700);
+--text-link-hover:var(--cyanotype-900);
+
+/* ---- Rules. The system is drawn with rules, never boxes with shadows. ---- */
+--rule-hair:0.5px;--rule-thin:1px;--rule-thick:3px;
+--rule-ink:var(--cyanotype-900);
+--rule-quiet:var(--chalk-300);
+--rule-mark:var(--sulphur-400);
+--rule-inverse:rgba(241,243,241,.28);
+--rule-inverse-quiet:rgba(241,243,241,.16);
+
+/* ---- Interactive ---- */
+--interactive-bg:var(--cyanotype-900);
+--interactive-bg-hover:var(--cyanotype-700);
+--interactive-fg:var(--chalk-50);
+--interactive-mark-bg:var(--sulphur-400);
+--interactive-mark-bg-hover:var(--sulphur-300);
+--interactive-mark-fg:var(--cyanotype-900);
+--interactive-quiet-hover:rgba(5,22,31,.07);
+--interactive-quiet-active:rgba(5,22,31,.13);
+--interactive-disabled-bg:var(--chalk-200);
+--interactive-disabled-fg:var(--chalk-500);
+--focus-ring:var(--sulphur-400);      /* sulphur focus is an Okwe signature */
+--focus-ring-width:2px;--focus-ring-offset:0px;
+--selection-bg:var(--sulphur-300);
+
+/* ---- Evidence classes. The trust system, in colour. ---- */
+--class-fact:var(--cyanotype-900);        /* sourced */
+--class-interpretation:var(--verdigris-600); /* our reading */
+--class-opinion:var(--stamp-600);         /* our view */
+--class-unknown:var(--chalk-500);         /* stated gap, dashed */
+
+/* ---- Status ---- */
+--status-success:var(--verdigris-600);--status-success-soft:var(--verdigris-100);
+--status-warning:var(--sulphur-600);--status-warning-soft:var(--sulphur-100);
+--status-danger:var(--stamp-600);--status-danger-soft:var(--stamp-100);
+--status-info:var(--cyanotype-600);--status-info-soft:var(--cyanotype-100);
+
+/* ---- Data, in series order. Ink first: charts are documents, not decoration. ---- */
+--data-1:var(--cyanotype-900);--data-2:var(--sulphur-400);--data-3:var(--verdigris-600);--data-4:var(--stamp-600);--data-5:var(--cyanotype-400);--data-6:var(--verdigris-300);
+--data-grid:var(--chalk-300);
+--data-zero:var(--cyanotype-900);
+--tally-filled:var(--sulphur-400);
+--tally-empty:var(--chalk-300);
+}
+
+/* PLATE MODE — the cyanotype negative. Covers, title cards, video graphics, report
+   covers. Not "dark mode for comfort": it is the second plate of the same document. */
+[data-theme="plate"]{
+--surface-page:var(--cyanotype-900);
+--surface-field:var(--cyanotype-800);
+--surface-inset:var(--cyanotype-700);
+--surface-ink:var(--cyanotype-900);
+--surface-ink-soft:var(--cyanotype-800);
+--surface-plate:var(--cyanotype-700);
+--text-primary:var(--chalk-50);
+--text-body:var(--chalk-100);
+--text-secondary:var(--cyanotype-200);
+--text-muted:var(--cyanotype-300);
+--text-quiet:var(--cyanotype-400);
+--text-inverse:var(--cyanotype-900);
+--text-inverse-muted:var(--cyanotype-600);
+--text-link:var(--sulphur-400);
+--text-link-hover:var(--sulphur-300);
+--rule-ink:var(--chalk-50);
+--rule-quiet:rgba(241,243,241,.22);
+--interactive-bg:var(--chalk-50);
+--interactive-bg-hover:var(--chalk-200);
+--interactive-fg:var(--cyanotype-900);
+--interactive-quiet-hover:rgba(241,243,241,.10);
+--interactive-quiet-active:rgba(241,243,241,.16);
+--interactive-disabled-bg:var(--cyanotype-700);
+--interactive-disabled-fg:var(--cyanotype-500);
+--class-fact:var(--chalk-50);
+--class-interpretation:var(--verdigris-300);
+--class-opinion:var(--stamp-400);
+--class-unknown:var(--cyanotype-400);
+--data-1:var(--chalk-50);--data-2:var(--sulphur-400);--data-3:var(--verdigris-300);--data-4:var(--stamp-400);--data-5:var(--cyanotype-300);--data-6:var(--verdigris-500);
+--data-grid:rgba(241,243,241,.18);
+--data-zero:var(--chalk-50);
+--tally-empty:rgba(241,243,241,.20);
+}

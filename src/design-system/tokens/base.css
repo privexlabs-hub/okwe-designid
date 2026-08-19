@@ -1,0 +1,31 @@
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--surface-page);color:var(--text-body);font:var(--type-body);letter-spacing:var(--tracking-body);text-wrap:pretty;-webkit-font-smoothing:antialiased}
+::selection{background:var(--selection-bg);color:var(--text-primary)}
+h1,h2,h3,h4,p,figure,blockquote,ol,ul{margin:0}
+h1{font:var(--type-h1);font-stretch:var(--stretch-display);letter-spacing:var(--tracking-display);color:var(--text-primary)}
+h2{font:var(--type-h2);font-stretch:var(--stretch-display);letter-spacing:var(--tracking-heading);color:var(--text-primary)}
+h3{font:var(--type-h3);color:var(--text-primary)}
+h4{font:var(--type-h4);color:var(--text-primary)}
+a{color:var(--text-link);text-decoration:none;box-shadow:inset 0 -1px 0 currentColor;transition:var(--transition-control)}
+a:hover{color:var(--text-link-hover);box-shadow:inset 0 -3px 0 var(--rule-mark)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:var(--focus-ring-width) solid var(--focus-ring);outline-offset:var(--focus-ring-offset)}
+hr{border:0;border-top:var(--rule-thin) solid var(--rule-ink);margin:var(--space-8) 0}
+code,kbd,samp{font-family:var(--font-mono);font-size:.88em}
+table{border-collapse:collapse}
+th{text-align:left;font:var(--type-label);font-stretch:var(--stretch-mono);letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--text-muted);padding:var(--space-3) var(--space-4);border-bottom:var(--rule-thin) solid var(--rule-ink)}
+td{font:var(--type-body-sm);padding:var(--space-3) var(--space-4);border-bottom:var(--rule-thin) solid var(--rule-quiet)}
+img{max-width:100%;display:block}
+
+/* --- The ledger primitives, as utilities so they cannot drift --- */
+.okwe-rule{border:0;border-top:var(--rule-thin) solid var(--rule-ink);width:100%}
+.okwe-rule--mark{border-top-width:var(--rule-thick);border-top-color:var(--rule-mark)}
+.okwe-rule--quiet{border-top-color:var(--rule-quiet)}
+/* The tally: quantity shown as counted units. Filled = measured, empty = remaining. */
+.okwe-tally{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,var(--tally-unit));gap:var(--tally-gap)}
+.okwe-tally i{width:var(--tally-unit);height:var(--tally-unit);background:var(--tally-empty);display:block}
+.okwe-tally i.is-filled{background:var(--tally-filled)}
+/* The margin annotation: reasoning attached to the page, not hidden in a footer. */
+.okwe-note{border-left:var(--rule-thin) solid var(--rule-ink);padding-left:var(--space-4);max-width:var(--measure-note);font:var(--type-caption);color:var(--text-muted)}
+/* The class stamp */
+.okwe-stamp{font:var(--type-label);font-stretch:var(--stretch-mono);letter-spacing:var(--tracking-label);text-transform:uppercase;border:var(--rule-thin) solid currentColor;padding:var(--stamp-pad) calc(var(--stamp-pad) + 3px);display:inline-block}

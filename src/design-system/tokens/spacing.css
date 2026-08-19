@@ -1,0 +1,27 @@
+/* ============================================================================
+   OKWE STRUCTURE — the ledger.
+   Not a 12-column grid. Every surface is an index rail plus a content field,
+   divided by rules that run edge to edge. Corners are square. Nothing floats.
+   ========================================================================== */
+:root{
+--space-0:0px;--space-px:1px;--space-1:2px;--space-2:4px;--space-3:8px;--space-4:12px;--space-5:16px;--space-6:20px;--space-7:28px;--space-8:36px;--space-9:48px;--space-10:64px;--space-11:88px;--space-12:120px;--space-13:160px;
+
+/* The ledger frame */
+--rail-index:104px;        /* left rail: call numbers, class stamps, dates */
+--rail-margin:216px;       /* right margin: annotations, sources, method notes */
+--field-gutter:28px;
+--page-margin:40px;
+--page-max:1320px;
+--read-max:640px;          /* reading field — narrower than the page, hung to the rail */
+--block-step:8px;          /* every vertical measure is a multiple of 8 */
+
+/* Corners: zero. The only exception is the 1px optical relief on inputs. */
+--radius-0:0px;--radius-sm:0px;--radius-md:0px;--radius-lg:0px;--radius-pill:0px;--radius-circle:50%;
+
+/* Controls sit on a 4px rhythm and stay rectangular. */
+--control-height-sm:26px;--control-height-md:34px;--control-height-lg:46px;
+--control-pad-sm:10px;--control-pad-md:16px;--control-pad-lg:22px;
+--tap-min:44px;
+--tally-unit:7px;--tally-gap:2px;   /* the counted square */
+--stamp-pad:5px;
+}

@@ -1,0 +1,12 @@
+/* Okwe Knowledge webfonts.
+   Three families chosen for behaviour, not fashion (see guidelines/visual-thesis.md):
+   — Archivo (variable width 62.5–125%): signage/documentary grotesk. Okwe sets headlines
+     at EXPANDED width (112–125%) so the headline reads as a stamped register entry, not a
+     fashionable neo-grotesk. Also the UI face at normal width.
+   — Literata (variable optical size): sturdy low-contrast reading serif for long-form.
+     Institutional without being academic; not a display serif.
+   — Martian Mono (variable width): squarish mono with unusually strong numerals. Carries
+     every call number, label, figure and tally in the system.
+   All three are open-licensed (OFL) and served from the Google CDN — practical for a team
+   of two, and unlikely to disappear. Replace with licensed files if they ever arrive. */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..700&family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..600&family=Martian+Mono:wdth,wght@75..112.5,400..700&display=swap");

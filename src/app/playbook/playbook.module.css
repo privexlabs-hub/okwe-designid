@@ -1,0 +1,175 @@
+/* The ledger applied to a document browser: an index rail, a rule, a reading
+   field. Measurements are the source document's own. */
+
+.shell {
+  height: 100vh;
+  display: flex;
+  background: var(--surface-page);
+}
+
+.rail {
+  width: 280px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  border-right: var(--rule-thin) solid var(--rule-ink);
+  padding: 32px 0 24px;
+  overflow-y: auto;
+}
+
+.railHead {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.callNumber {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.railRule {
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  margin: 0 24px;
+}
+
+.railLabel {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-quiet);
+}
+
+.searchWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 18px 24px 4px;
+}
+
+/* A ledger line, not a box: ruled underneath, square, no radius. */
+.search {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  border-bottom: var(--rule-thin) solid var(--rule-ink);
+  border-radius: var(--radius-0);
+  background: transparent;
+  padding: var(--space-3) 0;
+  font: var(--type-ui-sm);
+  color: var(--text-primary);
+}
+.search::placeholder { color: var(--text-quiet); }
+.search:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.navItem {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-4);
+  align-items: baseline;
+  padding: 9px 24px 9px 21px;
+  border: 0;
+  border-left: var(--rule-thick) solid transparent;
+  background: transparent;
+  text-align: left;
+  transition: background-color var(--duration-snap) var(--ease-mech);
+}
+.navItem:hover { background: var(--interactive-quiet-hover); }
+.navItemOn {
+  border-left-color: var(--rule-mark);
+  background: rgba(5, 22, 31, 0.05);
+}
+
+.navNum {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  font-weight: var(--weight-bold);
+  color: var(--text-secondary);
+  flex: none;
+}
+
+.navTitle {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--size-sm);
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* Search hit count, in the register voice. */
+.navCount {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-quiet);
+  flex: none;
+}
+
+.railFoot {
+  margin-top: auto;
+  padding: 20px 24px 0;
+  border-top: var(--rule-hair) solid var(--rule-quiet);
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  letter-spacing: var(--tracking-call);
+  color: var(--text-quiet);
+  line-height: 1.7;
+}
+.railFoot a { text-decoration: none; box-shadow: none; }
+.railFoot a:hover { box-shadow: inset 0 -3px 0 var(--rule-mark); }
+
+.field {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.column {
+  max-width: 760px;
+  padding: 48px 56px 96px;
+}
+
+.docHead {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: var(--rule-thick) solid var(--rule-ink);
+  padding-bottom: var(--space-4);
+  margin-bottom: 32px;
+}
+
+/* On a narrow screen the rail stops being a rail and becomes a header band:
+   the document still gets the full measure. */
+@media (max-width: 860px) {
+  .shell { height: auto; flex-direction: column; }
+  .rail {
+    width: 100%;
+    border-right: 0;
+    border-bottom: var(--rule-thick) solid var(--rule-ink);
+    padding-bottom: var(--space-5);
+  }
+  .railFoot { margin-top: var(--space-5); }
+  .field { overflow-y: visible; }
+  .column { padding: 32px var(--page-margin) 72px; }
+}

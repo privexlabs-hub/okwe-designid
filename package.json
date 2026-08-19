@@ -1,0 +1,37 @@
+{
+  "name": "okwe-knows",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Okwe Knowledge — the publishing operating system. Frontend-only Next.js port of the Claude Design project.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "npx serve out",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "fonts:fetch": "node scripts/fetch-fonts.mjs",
+    "fonts:verify": "node scripts/verify-fonts.mjs",
+    "assets:logo": "node scripts/build-logo-assets.mjs",
+    "assets:fontcss": "node scripts/build-font-css.mjs",
+    "prebuild": "node scripts/verify-fonts.mjs",
+    "verify": "node scripts/verify-app.mjs && node scripts/verify-interactions.mjs && node scripts/verify-export.mjs",
+    "shots": "node scripts/shoot.mjs"
+  },
+  "dependencies": {
+    "html-to-image": "1.11.13",
+    "jspdf": "2.5.2",
+    "jszip": "3.10.1",
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "eslint": "9.17.0",
+    "eslint-config-next": "15.5.4",
+    "sharp": "0.34.5",
+    "typescript": "5.7.2"
+  }
+}
