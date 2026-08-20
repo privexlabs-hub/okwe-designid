@@ -1,0 +1,157 @@
+/* OKW-PROOFS — responsive rules for the twelve content proofs.
+   Breakpoint literals mirror design-system/tokens/breakpoints.css
+   (custom properties cannot be read inside @media). */
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--space-9) var(--page-margin-fluid) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+}
+
+/* ---- Header: index rail · field · annotation margin --------------------- */
+.header {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) 216px;
+  grid-template-areas: "call title aside";
+  gap: var(--space-7);
+  align-items: end;
+  border-bottom: var(--rule-thick) solid var(--rule-ink);
+  padding-bottom: var(--space-6);
+}
+.headCall { grid-area: call; }
+.headTitle { grid-area: title; min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.headAside { grid-area: aside; display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start; }
+
+/* --bp-lg: 1100px — the annotation margin folds under the field. */
+@media (max-width: 1100px) {
+  .header {
+    grid-template-columns: 104px minmax(0, 1fr);
+    grid-template-areas:
+      "call  title"
+      ".     aside";
+    align-items: start;
+  }
+}
+/* --bp-sm: 600px — the index rail folds above the field. */
+@media (max-width: 600px) {
+  .header {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "call"
+      "title"
+      "aside";
+    gap: var(--space-5);
+  }
+}
+
+/* ---- The proof index ----------------------------------------------------
+   Sticky, so it must never take more than a sliver of the viewport. Above
+   the phone breakpoint it wraps; below it becomes one scrolling line. */
+.index {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface-page);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  padding: var(--space-3) 0;
+  border-bottom: var(--rule-thin) solid var(--rule-quiet);
+  max-height: 30vh;
+  overflow-y: auto;
+}
+/* --bp-md: 860px */
+@media (max-width: 860px) {
+  .index {
+    flex-wrap: nowrap;
+    overflow-y: hidden;
+    max-height: none;
+  }
+}
+
+/* ---- A proof: index rail + field ---------------------------------------- */
+.proof {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--space-7);
+  border-top: var(--rule-thin) solid var(--rule-ink);
+  padding-top: var(--space-6);
+  scroll-margin-top: 56px;
+}
+.proofWide { grid-template-columns: minmax(0, 1fr); }
+.proofBody { min-width: 0; grid-column: 2; }
+.proofWide .proofBody { grid-column: 1; }
+.proofRail { display: flex; flex-direction: column; gap: var(--space-3); }
+.proofRailWide { display: flex; gap: var(--space-5); align-items: baseline; flex-wrap: wrap; }
+
+/* --bp-sm: 600px — the index rail folds above the field. */
+@media (max-width: 600px) {
+  .proof { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+  .proofBody { grid-column: 1; }
+  .proofRail { flex-direction: row; gap: var(--space-5); align-items: baseline; flex-wrap: wrap; }
+}
+
+/* ---- Content grids ------------------------------------------------------ */
+/* Three figures, then two, then one. The mono figures are 78–124px wide, so
+   the track never goes below a width that can hold one. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-8);
+}
+/* A long tally (61 marks) is wider than a narrow track: it scrolls in its
+   own cell rather than pushing the page. */
+.stats > * {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Claim in the field, MarginNote in the annotation margin. */
+.annotated {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 216px;
+  gap: var(--space-7);
+  align-items: start;
+}
+.claim { min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.notes { display: flex; flex-direction: column; gap: var(--space-5); }
+/* --bp-lg: 1100px — notes drop under the claim they annotate, still on their rule. */
+@media (max-width: 1100px) {
+  .annotated { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- Fixed-size canvases: scroll the row, never the page ---------------- */
+.canvasRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  align-items: flex-start;
+  padding-bottom: var(--space-3);
+}
+.canvasRowTight { gap: var(--space-4); }
+.canvasSide { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.scrollHint {
+  display: none;
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+/* --bp-md: 860px */
+@media (max-width: 860px) {
+  .scrollHint { display: block; }
+}
+
+.h2 { font-size: var(--size-2xl); }
+@media (max-width: 860px) {
+  .h2 { font-size: clamp(23px, 5.4vw, var(--size-2xl)); }
+}
+
+/* The manifest diagrams are intrinsically wide; each scrolls in its own box. */
+.diagrams { display: flex; flex-direction: column; gap: var(--space-7); }

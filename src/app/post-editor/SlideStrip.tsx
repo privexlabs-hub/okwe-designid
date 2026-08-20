@@ -1,16 +1,24 @@
 "use client";
 
+import { DownloadControl } from "@/components/DownloadControl";
 import { IconButton } from "@/design-system/components/core/IconButton";
 import { Tooltip } from "@/design-system/components/core/Tooltip";
+import type { ExportTarget } from "@/lib/export";
 import type { EditorDoc } from "@/content/templates";
+import styles from "./editor.module.css";
 
 export interface SlideStripProps {
   doc: EditorDoc;
   set: (patch: Partial<EditorDoc>) => void;
+  /**
+   * Resolves the offscreen staging node for a slide at its TRUE canvas size,
+   * so every slide can be taken on its own in any single format.
+   */
+  targetFor: (index: number) => ExportTarget | null;
 }
 
 /** Bottom strip: slide chips plus duplicate / delete. */
-export function SlideStrip({ doc, set }: SlideStripProps) {
+export function SlideStrip({ doc, set, targetFor }: SlideStripProps) {
   const dup = () => {
     const slides = [...doc.slides];
     slides.splice(doc.active + 1, 0, { ...doc.slides[doc.active] });
@@ -26,53 +34,54 @@ export function SlideStrip({ doc, set }: SlideStripProps) {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--space-4)",
-        padding: "var(--space-4) var(--space-7)",
-        borderTop: "1px solid var(--rule-quiet)",
-        background: "var(--surface-field)",
-      }}
-    >
-      <div style={{ display: "flex", gap: "var(--space-3)", overflowX: "auto", flex: 1 }}>
+    <div className={styles.strip}>
+      <div className={styles.stripScroll}>
         {doc.slides.map((s, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => set({ active: i })}
-            aria-label={`Slide ${i + 1}`}
-            aria-pressed={i === doc.active}
-            style={{
-              cursor: "pointer",
-              flex: "none",
-              width: 64,
-              height: 48,
-              border: "2px solid " + (i === doc.active ? "var(--rule-ink)" : "var(--rule-quiet)"),
-              borderRadius: "var(--radius-0)",
-              background:
-                s.theme === "plate"
-                  ? "var(--cyanotype-900)"
-                  : s.theme === "mark"
-                    ? "var(--sulphur-400)"
-                    : s.theme === "system"
-                      ? "var(--verdigris-700)"
-                      : "var(--chalk-50)",
-              color:
-                s.theme === "chalk" || s.theme === "field" || s.theme === "mark"
-                  ? "var(--cyanotype-900)"
-                  : "var(--chalk-50)",
-              font: "var(--type-label)",
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            {String(i + 1).padStart(2, "0")}
-          </button>
+          <div key={i} className={styles.stripItem}>
+            <button
+              type="button"
+              onClick={() => set({ active: i })}
+              aria-label={`Slide ${i + 1}`}
+              aria-pressed={i === doc.active}
+              style={{
+                cursor: "pointer",
+                flex: "none",
+                width: "100%",
+                height: 48,
+                border:
+                  "2px solid " +
+                  (i === doc.active ? "var(--rule-ink)" : "var(--rule-quiet)"),
+                borderRadius: "var(--radius-0)",
+                background:
+                  s.theme === "plate"
+                    ? "var(--cyanotype-900)"
+                    : s.theme === "mark"
+                      ? "var(--sulphur-400)"
+                      : s.theme === "system"
+                        ? "var(--verdigris-700)"
+                        : "var(--chalk-50)",
+                color:
+                  s.theme === "chalk" ||
+                  s.theme === "field" ||
+                  s.theme === "mark"
+                    ? "var(--cyanotype-900)"
+                    : "var(--chalk-50)",
+                font: "var(--type-label)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              {String(i + 1).padStart(2, "0")}
+            </button>
+            <DownloadControl
+              size="sm"
+              label={`slide ${String(i + 1).padStart(2, "0")}`}
+              getTarget={() => targetFor(i)}
+            />
+          </div>
         ))}
       </div>
-      <div style={{ display: "flex", gap: "var(--space-2)" }}>
+      <div className={styles.stripActions}>
         <Tooltip label="Duplicate slide">
           <IconButton label="Duplicate slide" variant="outline" onClick={dup}>
             <svg

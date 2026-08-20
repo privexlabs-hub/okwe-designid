@@ -66,16 +66,47 @@
 /* Below the ledger's natural width the three columns cannot hold their measure,
    so the rail and the annotation margin fold under the field rather than
    squeezing. The rules stay; only the columns collapse. */
-@media (max-width: 900px) {
+/* --bp-lg (1100px): the annotation margin folds under the field — it is the
+   entry's meta line, which is commentary, so it goes first. */
+@media (max-width: 1100px) {
   .entry {
-    grid-template-columns: 64px 1fr;
-    gap: var(--space-5);
+    grid-template-columns: var(--rail-index) 1fr;
+    gap: var(--space-6);
   }
   .entryMeta {
     grid-column: 2;
     padding-top: var(--space-2);
   }
+}
+
+/* --bp-md (860px): the headline steps down and the rail narrows. */
+@media (max-width: 860px) {
+  .entry {
+    grid-template-columns: 64px 1fr;
+    gap: var(--space-5);
+  }
   .entryTitle {
     font-size: var(--size-xl);
+  }
+}
+
+/* --bp-sm (600px): the index rail folds above the entry. The number keeps its
+   own line, so the register still reads as numbered — the ledger survives. */
+@media (max-width: 600px) {
+  .entry {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding: var(--space-5) 0 var(--space-6);
+  }
+  .num,
+  .entryMeta {
+    grid-column: 1;
+    padding-top: 0;
+  }
+  .entryTitle {
+    font-size: clamp(21px, 6vw, var(--size-xl));
+  }
+  .entryText {
+    font-size: var(--size-xs);
   }
 }

@@ -152,6 +152,62 @@ export async function toSvgString(target: ExportTarget): Promise<string> {
   return decodeURIComponent(dataUrl.replace(/^data:image\/svg\+xml;charset=utf-8,/, ""));
 }
 
+/** The formats a single asset can be delivered in. */
+export const SINGLE_FORMATS = ["png", "jpg", "pdf", "svg"] as const;
+export type SingleFormat = (typeof SINGLE_FORMATS)[number];
+
+export const FORMAT_LABEL: Record<SingleFormat, string> = {
+  png: "PNG — lossless, transparent",
+  jpg: "JPG — smaller, chalk ground",
+  pdf: "PDF — one page, raster",
+  svg: "SVG — vector frame, embedded type",
+};
+
+const MIME: Record<SingleFormat, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  pdf: "application/pdf",
+  svg: "image/svg+xml",
+};
+
+/**
+ * Render ONE asset in ONE format.
+ *
+ * This is the primitive the whole export system is built on: the batch helpers
+ * below call it per asset, and the per-asset download controls call it directly.
+ * Anything exportable in bulk is therefore exportable on its own, in any format.
+ */
+export async function exportOne(
+  target: ExportTarget,
+  format: SingleFormat,
+  opts?: RasterOptions,
+): Promise<PackagedFile> {
+  const name = `${target.name}.${format}`;
+  switch (format) {
+    case "png":
+      return { name, blob: await toPng(target, opts) };
+    case "jpg":
+      return { name, blob: await toJpg(target, opts) };
+    case "pdf":
+      return { name, blob: await toPdf([target], opts) };
+    case "svg": {
+      const svg = await toSvgString(target);
+      return { name, blob: new Blob([svg], { type: MIME.svg }) };
+    }
+  }
+}
+
+/** Render one asset and hand it straight to the user. */
+export async function downloadOne(
+  target: ExportTarget,
+  format: SingleFormat,
+  opts?: RasterOptions,
+): Promise<string> {
+  const file = await exportOne(target, format, opts);
+  download(file.blob, file.name);
+  return file.name;
+}
+
 export interface PackagedFile {
   name: string;
   blob: Blob;

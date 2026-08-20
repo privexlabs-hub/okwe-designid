@@ -8,6 +8,7 @@ import { Select } from "@/design-system/components/forms/Select";
 import { Switch } from "@/design-system/components/forms/Switch";
 import { CONTENT_TYPES, SERIES, THEMES } from "@/content/templates";
 import type { EditorDoc, Slide } from "@/content/templates";
+import styles from "./editor.module.css";
 
 const LABEL: CSSProperties = {
   font: "var(--type-label)",
@@ -40,19 +41,7 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
   const chars = (slide.title || "").length;
 
   return (
-    <aside
-      style={{
-        width: 320,
-        flex: "none",
-        borderLeft: "1px solid var(--rule-quiet)",
-        background: "var(--surface-field)",
-        overflowY: "auto",
-        padding: "var(--space-6)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--space-6)",
-      }}
-    >
+    <aside aria-label="Inspector" className={styles.inspector}>
       <div style={SECTION}>
         <span style={LABEL}>Piece</span>
         <Field label="Series" htmlFor="series">
@@ -63,7 +52,7 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
             onChange={(e) => set({ series: e.target.value })}
           />
         </Field>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
+        <div className={styles.pair}>
           <Field label="No." htmlFor="no">
             <Input
               id="no"
@@ -96,7 +85,11 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
         </Field>
         <Field
           label="Headline"
-          hint={chars > 62 ? "Too long for a phone — cut to 62." : `${chars}/62 characters`}
+          hint={
+            chars > 62
+              ? "Too long for a phone — cut to 62."
+              : `${chars}/62 characters`
+          }
           htmlFor="hl"
         >
           <Input
@@ -129,7 +122,7 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
           </Field>
         )}
         {slide.kind === "stat" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
+          <div className={styles.pair}>
             <Field label="Figure" htmlFor="fg">
               <Input
                 id="fg"
@@ -149,7 +142,11 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
           </div>
         )}
         {(slide.kind === "stat" || doc.contentType === "Numbers") && (
-          <Field label="Source" hint="Required. Say so if illustrative." htmlFor="sc">
+          <Field
+            label="Source"
+            hint="Required. Say so if illustrative."
+            htmlFor="sc"
+          >
             <Input
               id="sc"
               size="sm"
@@ -170,7 +167,9 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
 
       <div style={SECTION_RULED}>
         <span style={LABEL}>Canvas</span>
-        <div style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
+        <div
+          style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}
+        >
           {THEMES.map((t) => (
             <button
               key={t.id}
@@ -185,7 +184,10 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
                 cursor: "pointer",
                 borderRadius: "var(--radius-0)",
                 border:
-                  "2px solid " + (slide.theme === t.id ? "var(--rule-ink)" : "var(--rule-quiet)"),
+                  "2px solid " +
+                  (slide.theme === t.id
+                    ? "var(--rule-ink)"
+                    : "var(--rule-quiet)"),
                 background:
                   t.id === "plate"
                     ? "var(--cyanotype-900)"
@@ -200,7 +202,11 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
             />
           ))}
         </div>
-        <Field label="Image" hint="Drop a photograph — right third on thumbnails." htmlFor="im">
+        <Field
+          label="Image"
+          hint="Drop a photograph — right third on thumbnails."
+          htmlFor="im"
+        >
           <div
             id="im"
             style={{
@@ -238,14 +244,26 @@ function QualityGate({ doc, slide }: { doc: EditorDoc; slide: Slide }) {
       label: "Teaches one idea",
       ok: (slide.title || "").length > 0 && (slide.title || "").length <= 62,
     },
-    { label: "Claim has a source", ok: !!slide.source || doc.contentType !== "Numbers" },
-    { label: "Plain language", ok: !/leverage|synergy|utili[sz]e/i.test(slide.body || "") },
+    {
+      label: "Claim has a source",
+      ok: !!slide.source || doc.contentType !== "Numbers",
+    },
+    {
+      label: "Plain language",
+      ok: !/leverage|synergy|utili[sz]e/i.test(slide.body || ""),
+    },
     { label: "Series set", ok: !!doc.series },
   ];
   const score = checks.filter((c) => c.ok).length;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--space-3)",
+      }}
+    >
       {checks.map((c) => (
         <div
           key={c.label}
@@ -258,7 +276,9 @@ function QualityGate({ doc, slide }: { doc: EditorDoc; slide: Slide }) {
           }}
         >
           <span>{c.label}</span>
-          <Badge tone={c.ok ? "fact" : "unknown"}>{c.ok ? "Pass" : "Check"}</Badge>
+          <Badge tone={c.ok ? "fact" : "unknown"}>
+            {c.ok ? "Pass" : "Check"}
+          </Badge>
         </div>
       ))}
       <div

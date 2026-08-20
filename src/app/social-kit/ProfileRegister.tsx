@@ -7,6 +7,7 @@ import { Tag } from "@/design-system/components/core/Tag";
 import { Logo } from "@/design-system/components/brand/Logo";
 import { PROFILES, TIER_FILTERS } from "@/content/profiles";
 import type { ProfileTier, SocialProfile } from "@/content/profiles";
+import s from "./social-kit.module.css";
 
 type Filter = "All" | ProfileTier;
 type CopyState = "idle" | "copied" | "manual";
@@ -48,18 +49,14 @@ function ProfileRow({ d }: { d: SocialProfile }) {
   }, [d.bio, flash]);
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "88px 1fr 200px",
-        gap: "var(--space-6)",
-        padding: "var(--space-6) 0",
-        borderTop: "1px solid var(--rule-quiet)",
-        alignItems: "start",
-      }}
-    >
-      <Logo variant="avatar" size={88} />
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+    <div className={s.row}>
+      <span className={s.avatar}>
+        <Logo variant="avatar" size={88} />
+      </span>
+      <span className={s.avatarSmall}>
+        <Logo variant="avatar" size={56} />
+      </span>
+      <div className={s.body}>
         <div
           style={{
             display: "flex",
@@ -72,9 +69,7 @@ function ProfileRow({ d }: { d: SocialProfile }) {
           <span style={{ font: "var(--type-data)", color: "var(--text-muted)" }}>{d.handle}</span>
           <Badge tone={toneFor(d.tier)}>{d.tier}</Badge>
         </div>
-        <p style={{ font: "var(--type-body-sm)", color: "var(--text-body)", maxWidth: "64ch" }}>
-          {d.bio}
-        </p>
+        <p className={s.bio}>{d.bio}</p>
         <span style={{ font: "var(--type-caption)", color: "var(--text-muted)" }}>
           Role — {d.role}
         </span>
@@ -93,7 +88,7 @@ function ProfileRow({ d }: { d: SocialProfile }) {
           </span>
         </div>
       </div>
-      <span style={{ font: "var(--type-data)", color: "var(--text-secondary)" }}>{d.link}</span>
+      <span className={s.link}>{d.link}</span>
     </div>
   );
 }
@@ -105,12 +100,8 @@ export function ProfileRegister() {
 
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
-      <h2 style={{ font: "var(--type-h2)", fontSize: "var(--size-2xl)" }}>Profiles and bios</h2>
-      <div
-        role="group"
-        aria-label="Filter profiles by tier"
-        style={{ display: "flex", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}
-      >
+      <h2 className={s.h2}>Profiles and bios</h2>
+      <div role="group" aria-label="Filter profiles by tier" className={s.filters}>
         {TIER_FILTERS.map((t) => (
           <Tag
             key={t}
@@ -130,13 +121,7 @@ export function ProfileRegister() {
             {t}
           </Tag>
         ))}
-        <span
-          style={{
-            font: "var(--type-data)",
-            color: "var(--text-muted)",
-            marginLeft: "var(--space-3)",
-          }}
-        >
+        <span className={s.count}>
           {shown.length} of {PROFILES.length} surfaces
         </span>
       </div>

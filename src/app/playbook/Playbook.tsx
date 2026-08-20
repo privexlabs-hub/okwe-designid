@@ -103,6 +103,7 @@ export function Playbook() {
         <div className={styles.railLabel} style={{ padding: "18px 24px 8px" }}>
           The playbooks
         </div>
+        <div className={styles.navRow}>
         {DOCS.map((d) => {
           const on = d.slug === doc.slug;
           const n = hits?.get(d.slug);
@@ -122,6 +123,7 @@ export function Playbook() {
             </button>
           );
         })}
+        </div>
 
         <div className={styles.railLabel} style={{ padding: "22px 24px 8px" }}>
           Launch

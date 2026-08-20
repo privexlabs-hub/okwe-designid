@@ -4,30 +4,25 @@ import { useState } from "react";
 import { Tag } from "@/design-system/components/core/Tag";
 import { TEMPLATES } from "@/content/templates";
 import type { Template } from "@/content/templates";
+import styles from "./editor.module.css";
 
 export interface TemplateRailProps {
   active: string;
   onPick: (t: Template) => void;
+  /** Called after a pick so the drawer form can close itself. */
+  onPicked?: () => void;
 }
 
 /** Left rail: platform filter, then the template register. */
-export function TemplateRail({ active, onPick }: TemplateRailProps) {
+export function TemplateRail({ active, onPick, onPicked }: TemplateRailProps) {
   const [platform, setPlatform] = useState("All");
   const platforms = ["All", ...new Set(TEMPLATES.map((t) => t.platform))];
-  const list = TEMPLATES.filter((t) => platform === "All" || t.platform === platform);
+  const list = TEMPLATES.filter(
+    (t) => platform === "All" || t.platform === platform,
+  );
 
   return (
-    <aside
-      style={{
-        width: 264,
-        flex: "none",
-        borderRight: "1px solid var(--rule-quiet)",
-        background: "var(--surface-field)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
+    <aside id="template-rail" aria-label="Templates" className={styles.rail}>
       <div
         style={{
           padding: "var(--space-5)",
@@ -47,7 +42,9 @@ export function TemplateRail({ active, onPick }: TemplateRailProps) {
         >
           Templates
         </span>
-        <div style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}>
+        <div
+          style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}
+        >
           {platforms.map((p) => (
             // The source used a bare <Tag> here; it needs to be a real button to
             // be reachable from the keyboard.
@@ -56,11 +53,20 @@ export function TemplateRail({ active, onPick }: TemplateRailProps) {
               type="button"
               onClick={() => setPlatform(p)}
               aria-pressed={p === platform}
-              style={{ background: "none", border: 0, padding: 0, cursor: "pointer" }}
+              style={{
+                background: "none",
+                border: 0,
+                padding: 0,
+                cursor: "pointer",
+              }}
             >
               <Tag
                 selected={p === platform}
-                style={{ cursor: "pointer", fontSize: "var(--size-2xs)", padding: "2px 8px" }}
+                style={{
+                  cursor: "pointer",
+                  fontSize: "var(--size-2xs)",
+                  padding: "2px 8px",
+                }}
               >
                 {p}
               </Tag>
@@ -75,7 +81,10 @@ export function TemplateRail({ active, onPick }: TemplateRailProps) {
             <button
               key={t.code}
               type="button"
-              onClick={() => onPick(t)}
+              onClick={() => {
+                onPick(t);
+                onPicked?.();
+              }}
               aria-pressed={on}
               style={{
                 width: "100%",
@@ -84,14 +93,19 @@ export function TemplateRail({ active, onPick }: TemplateRailProps) {
                 background: on ? "var(--surface-inset)" : "transparent",
                 border: 0,
                 borderBottom: "1px solid var(--rule-quiet)",
-                borderLeft: "2px solid " + (on ? "var(--surface-mark)" : "transparent"),
+                borderLeft:
+                  "2px solid " + (on ? "var(--surface-mark)" : "transparent"),
                 padding: "var(--space-5)",
                 display: "flex",
                 flexDirection: "column",
                 gap: "var(--space-2)",
               }}
             >
-              <span style={{ font: "var(--type-h4)", color: "var(--text-primary)" }}>{t.name}</span>
+              <span
+                style={{ font: "var(--type-h4)", color: "var(--text-primary)" }}
+              >
+                {t.name}
+              </span>
               <span
                 style={{
                   font: "var(--type-label)",
@@ -101,7 +115,12 @@ export function TemplateRail({ active, onPick }: TemplateRailProps) {
               >
                 {t.code}
               </span>
-              <span style={{ font: "var(--type-caption)", color: "var(--text-secondary)" }}>
+              <span
+                style={{
+                  font: "var(--type-caption)",
+                  color: "var(--text-secondary)",
+                }}
+              >
                 {t.platform} · {t.canvas}
               </span>
             </button>

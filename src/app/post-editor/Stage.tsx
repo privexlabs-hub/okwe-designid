@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import type { CanvasName } from "@/design-system/components/social/PostCanvas";
 import { CANVASES } from "@/design-system/components/social/PostCanvas";
 import { CarouselSlide } from "@/design-system/components/social/CarouselSlide";
@@ -7,6 +9,7 @@ import type { CarouselSlideKind } from "@/design-system/components/social/Carous
 import { StatCard } from "@/design-system/components/social/StatCard";
 import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
 import type { EditorDoc, Slide } from "@/content/templates";
+import styles from "./editor.module.css";
 
 /** On-screen render width for a canvas, from the source's Stage.jsx. */
 export function renderWidthFor(canvas: CanvasName): number {
@@ -59,7 +62,11 @@ export function SlideArt({ doc, slide, index, width }: SlideArtProps) {
         renderWidth={width}
         title={slide.title}
         duration={slide.unit}
-        theme={slide.theme === "chalk" || slide.theme === "field" ? "plate" : slide.theme}
+        theme={
+          slide.theme === "chalk" || slide.theme === "field"
+            ? "plate"
+            : slide.theme
+        }
         series={doc.series}
         issue={doc.issue}
         question={slide.body}
@@ -84,51 +91,64 @@ export function SlideArt({ doc, slide, index, width }: SlideArtProps) {
   );
 }
 
+/**
+ * Width the canvas may actually take: never more than the container it sits
+ * in, never more than the design's preview width. Measured rather than
+ * guessed, so the phone gets a canvas that fits instead of one that overlaps
+ * the panel beside it. Aspect ratio is untouched — SlideArt derives its own
+ * height from the width.
+ */
+function useFittedWidth(max: number) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [avail, setAvail] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      const cs = getComputedStyle(el);
+      const pad =
+        parseFloat(cs.paddingLeft || "0") + parseFloat(cs.paddingRight || "0");
+      setAvail(Math.max(160, Math.floor(el.clientWidth - pad)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return { ref, width: avail === null ? max : Math.min(max, avail) };
+}
+
 export interface StageProps {
   doc: EditorDoc;
   slide: Slide;
+  /** Download control for the slide on screen, rendered under the canvas. */
+  action?: ReactNode;
 }
 
 /** Centre column: the active slide at preview size, with its measurements. */
-export function Stage({ doc, slide }: StageProps) {
+export function Stage({ doc, slide, action }: StageProps) {
   const canvas = doc.template.canvas;
-  const width = renderWidthFor(canvas);
+  const { ref, width } = useFittedWidth(renderWidthFor(canvas));
 
   return (
-    <div
-      style={{
-        flex: 1,
-        minWidth: 0,
-        overflow: "auto",
-        background: "var(--surface-inset)",
-        display: "grid",
-        placeItems: "center",
-        padding: "var(--space-9)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--space-5)",
-          alignItems: "center",
-        }}
-      >
-        <SlideArt doc={doc} slide={slide} index={doc.active + 1} width={width} />
-        <div
-          style={{
-            font: "var(--type-data)",
-            color: "var(--text-muted)",
-            display: "flex",
-            gap: "var(--space-5)",
-          }}
-        >
+    <div ref={ref} className={styles.stage}>
+      <div className={styles.stageInner}>
+        <SlideArt
+          doc={doc}
+          slide={slide}
+          index={doc.active + 1}
+          width={width}
+        />
+        <div className={styles.stageMeta}>
           <span>{doc.template.code}</span>
           <span>
             {CANVASES[canvas].w} × {CANVASES[canvas].h}
           </span>
           <span>{doc.template.platform}</span>
         </div>
+        {action}
       </div>
     </div>
   );
@@ -155,7 +175,12 @@ export function StagingArea({ doc, registerNode }: StagingAreaProps) {
     <div
       aria-hidden="true"
       inert
-      style={{ position: "fixed", left: -100000, top: 0, pointerEvents: "none" }}
+      style={{
+        position: "fixed",
+        left: -100000,
+        top: 0,
+        pointerEvents: "none",
+      }}
     >
       {doc.slides.map((s, i) => (
         <div key={i} ref={(node) => registerNode(i, node)} style={{ width }}>

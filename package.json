@@ -15,7 +15,8 @@
     "assets:fontcss": "node scripts/build-font-css.mjs",
     "prebuild": "node scripts/verify-fonts.mjs",
     "verify": "node scripts/verify-app.mjs && node scripts/verify-interactions.mjs && node scripts/verify-export.mjs",
-    "shots": "node scripts/shoot.mjs"
+    "shots": "node scripts/shoot.mjs",
+    "audit": "node scripts/audit-responsive.mjs"
   },
   "dependencies": {
     "html-to-image": "1.11.13",

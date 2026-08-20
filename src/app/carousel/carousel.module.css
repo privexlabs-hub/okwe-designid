@@ -47,8 +47,22 @@
 
 .deck { display: flex; gap: var(--space-6); flex-wrap: wrap; }
 
-/* Each slide is selectable: a 3px sulphur rule marks the one being edited. */
+/* Each slide is selectable: a 3px sulphur rule marks the one being edited.
+   The slot is a wrapper so the per-slide download control can sit beside the
+   picker — a button inside a button would be invalid HTML. */
 .slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  border-top: var(--rule-thick) solid transparent;
+  padding-top: var(--space-3);
+  transition: border-top-color var(--duration-snap) var(--ease-mech);
+}
+.slot:hover { border-top-color: var(--rule-quiet); }
+.slotOn { border-top-color: var(--rule-mark); }
+
+.slotPick {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -57,12 +71,12 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
-  border-top: var(--rule-thick) solid transparent;
-  padding-top: var(--space-3);
-  transition: border-top-color var(--duration-snap) var(--ease-mech);
+  min-width: 0;
 }
-.slot:hover { border-top-color: var(--rule-quiet); }
-.slotOn { border-top-color: var(--rule-mark); }
+.slotPick:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
 
 .slotMeta {
   font-family: var(--font-mono);
@@ -144,6 +158,7 @@
   pointer-events: none;
 }
 
+/* --bp-lg (1100px): the annotation margin folds under the field. */
 @media (max-width: 1100px) {
   .work { grid-template-columns: minmax(0, 1fr); }
   .editor {
@@ -152,5 +167,36 @@
     border-top: var(--rule-thick) solid var(--rule-ink);
     padding-left: 0;
     padding-top: var(--space-6);
+  }
+}
+
+/* --bp-md (860px): the deck centres its slides rather than left-hanging,
+   so a two-up row does not leave a lopsided gap. */
+@media (max-width: 860px) {
+  .page { padding: var(--space-7) var(--page-margin-fluid) var(--space-9); }
+  .deck { gap: var(--space-5); }
+}
+
+/* --bp-sm (600px): one slide per row, full width, and the preview scales
+   to the viewport instead of holding its 260px design width. */
+@media (max-width: 600px) {
+  .page { gap: var(--space-6); }
+  .deck { flex-direction: column; gap: var(--space-7); }
+  .slot { width: 100%; }
+  /* CarouselSlide renders at a fixed renderWidth; scale it down to fit
+     rather than letting it push the page sideways. */
+  .slotPick > :global(div) {
+    max-width: 100%;
+    transform-origin: top left;
+  }
+  .slotMeta { font-size: 11px; }
+}
+
+/* --bp-xs (400px): the deck artwork is fixed-size, so let it scroll inside
+   its own box rather than overflowing the page. */
+@media (max-width: 400px) {
+  .slotPick {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

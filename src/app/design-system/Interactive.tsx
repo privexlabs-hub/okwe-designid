@@ -177,7 +177,7 @@ export function FormsSpecimen() {
   const [published, setPublished] = useState(false);
 
   return (
-    <div style={{ display: "grid", gap: "var(--space-8)", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))" }}>
+    <div style={{ display: "grid", gap: "var(--space-8)", gridTemplateColumns: "repeat(auto-fit,minmax(min(280px,100%),1fr))" }}>
       <div style={stack}>
         <Field label="Entry title" index="01" htmlFor="ds-title" required hint="Sentence case, no full stop.">
           <Input

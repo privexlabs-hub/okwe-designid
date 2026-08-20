@@ -10,15 +10,17 @@ import { CANVASES } from "@/design-system/components/social/PostCanvas";
 import {
   ExportError,
   download,
-  slugify,
+  exportOne,
   toJpg,
   toPdf,
   toPng,
   toSvgString,
   toZip,
 } from "@/lib/export";
-import type { ExportTarget } from "@/lib/export";
+import type { ExportTarget, SingleFormat } from "@/lib/export";
 import type { EditorDoc } from "@/content/templates";
+import { baseName, slideName } from "./naming";
+import styles from "./editor.module.css";
 
 interface Formats {
   png: boolean;
@@ -35,9 +37,16 @@ export interface ExportDialogProps {
   onClose: () => void;
   /** The offscreen staging nodes, one per slide, in deck order. */
   getNodes: () => (HTMLElement | null)[];
+  /** One slide as an export target, at its true canvas size. */
+  targetFor: (index: number) => ExportTarget | null;
 }
 
-export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
+export function ExportDialog({
+  doc,
+  onClose,
+  getNodes,
+  targetFor,
+}: ExportDialogProps) {
   const [fmt, setFmt] = useState<Formats>({
     png: true,
     jpg: false,
@@ -49,19 +58,65 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
+  const [one, setOne] = useState("");
 
-  const base = `okwe-knowledge-${slugify(doc.series)}-${slugify(doc.slides[0]?.title || "")}`;
-  const slideName = (i: number) => `${base}-slide-${String(i + 1).padStart(2, "0")}`;
+  const base = baseName(doc);
+  const name = (i: number) => slideName(doc, i);
 
-  /** Exactly the files the Export button will produce, in the order it makes them. */
-  const names: string[] = [];
+  /**
+   * Exactly the files the Export button will produce, in the order it makes
+   * them — and each one is individually downloadable from its own row.
+   */
+  const files: { name: string; slide: number | null; format: SingleFormat }[] =
+    [];
   doc.slides.forEach((_, i) => {
-    if (fmt.png) names.push(`${slideName(i)}.png`);
-    if (fmt.jpg) names.push(`${slideName(i)}.jpg`);
-    if (fmt.svg) names.push(`${slideName(i)}.svg`);
+    if (fmt.png)
+      files.push({ name: `${name(i)}.png`, slide: i, format: "png" });
+    if (fmt.jpg)
+      files.push({ name: `${name(i)}.jpg`, slide: i, format: "jpg" });
+    if (fmt.svg)
+      files.push({ name: `${name(i)}.svg`, slide: i, format: "svg" });
   });
-  if (fmt.pdf) names.push(`${base}.pdf`);
-  const delivered = fmt.zip && names.length > 0 ? [`${base}-package.zip`] : names;
+  if (fmt.pdf) files.push({ name: `${base}.pdf`, slide: null, format: "pdf" });
+  const names = files.map((f) => f.name);
+  const delivered =
+    fmt.zip && names.length > 0 ? [`${base}-package.zip`] : names;
+
+  const px = () => Math.max(1, SCALES.indexOf(scale) + 1);
+
+  /** Take one listed file on its own, leaving the batch flow untouched. */
+  async function runOne(file: {
+    name: string;
+    slide: number | null;
+    format: SingleFormat;
+  }) {
+    setError("");
+    setOne(file.name);
+    try {
+      if (file.slide === null) {
+        // The combined PDF spans every slide, so it is built from all targets.
+        const targets = doc.slides
+          .map((_, i) => targetFor(i))
+          .filter((t): t is ExportTarget => t !== null);
+        if (!targets.length)
+          throw new ExportError("Nothing was rendered to export.");
+        download(await toPdf(targets, { scale: px() }), file.name);
+      } else {
+        const target = targetFor(file.slide);
+        if (!target) throw new ExportError("That slide is not rendered yet.");
+        const packaged = await exportOne(target, file.format, { scale: px() });
+        download(packaged.blob, packaged.name);
+      }
+    } catch (e) {
+      setError(
+        e instanceof ExportError
+          ? e.message
+          : `Export failed: ${(e as Error).message}`,
+      );
+    } finally {
+      setOne("");
+    }
+  }
 
   const toggle = (k: keyof Formats) => setFmt((f) => ({ ...f, [k]: !f[k] }));
 
@@ -75,22 +130,31 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
       doc.slides.forEach((_, i) => {
         const node = nodes[i];
         if (node) {
-          targets.push({ node, width: spec.w, height: spec.h, name: slideName(i) });
+          targets.push({ node, width: spec.w, height: spec.h, name: name(i) });
         }
       });
-      if (!targets.length) throw new ExportError("Nothing was rendered to export.");
+      if (!targets.length)
+        throw new ExportError("Nothing was rendered to export.");
 
       const px = Math.max(1, SCALES.indexOf(scale) + 1);
-      const files: { name: string; blob: Blob }[] = [];
+      const out: { name: string; blob: Blob }[] = [];
 
       for (let i = 0; i < targets.length; i++) {
         setProgress(`Exporting ${i + 1} of ${targets.length}…`);
         const t = targets[i];
-        if (fmt.png) files.push({ name: `${t.name}.png`, blob: await toPng(t, { scale: px }) });
-        if (fmt.jpg) files.push({ name: `${t.name}.jpg`, blob: await toJpg(t, { scale: px }) });
+        if (fmt.png)
+          out.push({
+            name: `${t.name}.png`,
+            blob: await toPng(t, { scale: px }),
+          });
+        if (fmt.jpg)
+          out.push({
+            name: `${t.name}.jpg`,
+            blob: await toJpg(t, { scale: px }),
+          });
         if (fmt.svg) {
           const svg = await toSvgString(t);
-          files.push({
+          out.push({
             name: `${t.name}.svg`,
             blob: new Blob([svg], { type: "image/svg+xml;charset=utf-8" }),
           });
@@ -99,16 +163,19 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
 
       if (fmt.pdf) {
         setProgress("Building the PDF…");
-        files.push({ name: `${base}.pdf`, blob: await toPdf(targets, { scale: px }) });
+        out.push({
+          name: `${base}.pdf`,
+          blob: await toPdf(targets, { scale: px }),
+        });
       }
 
-      if (!files.length) throw new ExportError("Choose at least one format.");
+      if (!out.length) throw new ExportError("Choose at least one format.");
 
       if (fmt.zip) {
         setProgress("Packaging…");
-        download(await toZip(files), `${base}-package.zip`);
+        download(await toZip(out), `${base}-package.zip`);
       } else {
-        for (const f of files) download(f.blob, f.name);
+        for (const f of out) download(f.blob, f.name);
       }
 
       setProgress("");
@@ -139,14 +206,32 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
           <Button variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button variant="mark" onClick={run} disabled={busy || delivered.length === 0}>
-            {busy ? progress || "Exporting…" : `Export ${delivered.length} files`}
+          <Button
+            variant="mark"
+            onClick={run}
+            disabled={busy || delivered.length === 0}
+          >
+            {busy
+              ? progress || "Exporting…"
+              : `Export ${delivered.length} files`}
           </Button>
         </>
       }
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-7)" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "var(--space-7)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-4)",
+          }}
+        >
           <span
             style={{
               font: "var(--type-label)",
@@ -157,9 +242,21 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
           >
             Formats
           </span>
-          <Checkbox label="PNG — every slide" checked={fmt.png} onChange={() => toggle("png")} />
-          <Checkbox label="JPG — every slide" checked={fmt.jpg} onChange={() => toggle("jpg")} />
-          <Checkbox label="PDF — combined" checked={fmt.pdf} onChange={() => toggle("pdf")} />
+          <Checkbox
+            label="PNG — every slide"
+            checked={fmt.png}
+            onChange={() => toggle("png")}
+          />
+          <Checkbox
+            label="JPG — every slide"
+            checked={fmt.jpg}
+            onChange={() => toggle("jpg")}
+          />
+          <Checkbox
+            label="PDF — combined"
+            checked={fmt.pdf}
+            onChange={() => toggle("pdf")}
+          />
           <Checkbox
             label="SVG — type and rules only"
             checked={fmt.svg}
@@ -180,7 +277,13 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
             />
           </Field>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-3)",
+          }}
+        >
           <span
             style={{
               font: "var(--type-label)",
@@ -207,15 +310,42 @@ export function ExportDialog({ doc, onClose, getNodes }: ExportDialogProps) {
               overflowY: "auto",
             }}
           >
-            {names.length === 0 ? <span>Choose a format.</span> : names.map((n) => <span key={n}>{n}</span>)}
+            {files.length === 0 ? (
+              <span>Choose a format.</span>
+            ) : (
+              files.map((f) => (
+                <div key={f.name} className={styles.fileRow}>
+                  <span className={styles.fileName}>{f.name}</span>
+                  <button
+                    type="button"
+                    className={styles.fileButton}
+                    onClick={() => runOne(f)}
+                    disabled={busy || one !== ""}
+                    aria-label={`Download ${f.name} on its own`}
+                  >
+                    {one === f.name ? "…" : "Get"}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
-          <span style={{ font: "var(--type-caption)", color: "var(--text-muted)" }}>
-            Names follow <b>okwe-knowledge-[series]-[topic]-slide-NN</b>. Files are rendered in the
-            browser and downloaded straight to this device — with ZIP checked they arrive as one
-            archive. The PDF is a raster image of each slide, so its text is not selectable.
+          <span
+            style={{ font: "var(--type-caption)", color: "var(--text-muted)" }}
+          >
+            Any single file can be taken on its own with <b>Get</b>. Names
+            follow <b>okwe-knowledge-[series]-[topic]-slide-NN</b>. Files are
+            rendered in the browser and downloaded straight to this device —
+            with ZIP checked they arrive as one archive. The PDF is a raster
+            image of each slide, so its text is not selectable.
           </span>
           {error && (
-            <span role="alert" style={{ font: "var(--type-caption)", color: "var(--status-danger)" }}>
+            <span
+              role="alert"
+              style={{
+                font: "var(--type-caption)",
+                color: "var(--status-danger)",
+              }}
+            >
               {error}
             </span>
           )}

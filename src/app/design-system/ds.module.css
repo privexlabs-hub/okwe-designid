@@ -1,0 +1,68 @@
+/* The specimen sheet folds the same way the rest of the ledger does. */
+
+/* --bp-sm (600px): the index rail folds above the specimen rather than being
+   squeezed to a zero-width column. The number and name become one ruled line. */
+.specimen {
+  display: grid;
+  grid-template-columns: var(--rail-index) 1fr;
+  column-gap: var(--field-gutter);
+  row-gap: var(--space-5);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+}
+@media (max-width: 600px) {
+  .specimen {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-4);
+  }
+  .specimenRail {
+    flex-direction: row !important;
+    align-items: baseline;
+    gap: var(--space-4) !important;
+  }
+}
+
+/* The type-role table: the 120px token column folds under its specimen. */
+.typeRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--space-5);
+  align-items: baseline;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-3);
+}
+@media (max-width: 600px) {
+  .typeRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+}
+
+/* Fixed-size canvas specimens scroll inside their own box on a phone. */
+@media (max-width: 860px) {
+  .canvasRow {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-3);
+  }
+}
+
+/* Specimens are fixed-size artwork (canvases at true pixel size, wordmarks with
+   white-space: nowrap). They must not be squeezed, so each specimen's body
+   scrolls inside its own box rather than pushing the page sideways. */
+.specimenBody {
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Type specimens are fixed-size by nature (register roles reach 124px). They
+   scroll in their own box rather than being clipped — a clipped type specimen
+   misrepresents the scale it exists to document. */
+.typeSpecimen {
+  display: block;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}

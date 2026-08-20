@@ -1,0 +1,55 @@
+/* ============================================================================
+   OKWE RESPONSIVE — the ledger at every width.
+   The design system defines one structure: an index rail (104px), a reading
+   field, and an annotation margin (216px). That frame is what has to survive
+   a narrow screen, so the rules below are about WHICH COLUMNS FOLD, not about
+   inventing a second design.
+   Order of collapse, widest to narrowest:
+     1. the annotation margin folds under the field  (it is commentary)
+     2. the index rail folds above the field         (it is a label)
+     3. multi-column content grids become one column
+   Rules never fold — they still run edge to edge — and corners stay square.
+   ========================================================================== */
+:root{
+--bp-xs:400px;   /* small phone */
+--bp-sm:600px;   /* phone, landscape phone */
+--bp-md:860px;   /* tablet portrait — the annotation margin folds here */
+--bp-lg:1100px;  /* tablet landscape / small laptop — the tool layouts fold */
+--bp-xl:1320px;  /* the full ledger, --page-max */
+
+/* Page margin shrinks with the viewport so the field keeps its measure. */
+--page-margin-fluid:clamp(16px, 4vw, 40px);
+/* The rails shrink before they fold. */
+--rail-index-fluid:clamp(56px, 8vw, 104px);
+}
+
+@media (max-width:1100px){
+  :root{ --rail-margin:0px; }
+}
+@media (max-width:600px){
+  :root{ --rail-index:0px; --field-gutter:16px; }
+}
+
+/* ---- Display type must not overrun a narrow measure ----
+   The identity is the expanded width, not the absolute size, so headlines
+   scale down with the viewport while keeping their 118% stretch. */
+@media (max-width:860px){
+  h1{ font-size:clamp(28px, 7vw, var(--size-4xl)); }
+  h2{ font-size:clamp(23px, 5.4vw, var(--size-2xl)); }
+}
+
+/* A long call number or template code must wrap rather than push the page. */
+@media (max-width:600px){
+  .okwe-label,.okwe-call{ overflow-wrap:anywhere; }
+}
+
+/* Tables and dense blocks scroll inside their own container, never the page. */
+.okwe-scroll-x{ overflow-x:auto; max-width:100%; -webkit-overflow-scrolling:touch; }
+
+/* Touch targets: the system's controls are 26/34/46px, which is below the 44px
+   tap minimum on the small sizes. Give them room on coarse pointers without
+   changing how they look on a mouse. */
+@media (pointer:coarse){
+  button,[role="button"],a.okwe-block-link,summary,label{ min-height:var(--tap-min); }
+  button,[role="button"]{ touch-action:manipulation; }
+}

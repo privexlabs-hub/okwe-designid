@@ -17,6 +17,7 @@ import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
 import { PLATE_KEY, PlateSwitch } from "./PlateSwitch";
 import { ProofIndex } from "./ProofIndex";
 import { proofId } from "./proofId";
+import css from "./proofs.module.css";
 
 export const metadata: Metadata = { title: "Content proofs" };
 
@@ -56,41 +57,22 @@ function Proof({
       id={proofId(n)}
       tabIndex={-1}
       aria-label={`Proof ${String(n).padStart(2, "0")} — ${title}`}
-      style={{
-        display: "grid",
-        gridTemplateColumns: wide ? "1fr" : "104px 1fr",
-        gap: "28px",
-        borderTop: "var(--rule-thin) solid var(--rule-ink)",
-        paddingTop: "20px",
-        scrollMarginTop: "56px",
-      }}
+      className={wide ? `${css.proof} ${css.proofWide}` : css.proof}
     >
-      {!wide && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <span className="okwe-call" style={{ fontWeight: 700 }}>
-            {String(n).padStart(2, "0")}
+      <div className={wide ? css.proofRailWide : css.proofRail}>
+        <span className="okwe-call" style={{ fontWeight: 700 }}>
+          {String(n).padStart(2, "0")}
+        </span>
+        <span className="okwe-call" style={{ color: "var(--text-muted)" }}>
+          {title}
+        </span>
+        {note && !wide && (
+          <span className="okwe-source" style={{ color: "var(--text-quiet)" }}>
+            {note}
           </span>
-          <span className="okwe-call" style={{ color: "var(--text-muted)" }}>
-            {title}
-          </span>
-          {note && (
-            <span className="okwe-source" style={{ color: "var(--text-quiet)" }}>
-              {note}
-            </span>
-          )}
-        </div>
-      )}
-      {wide && (
-        <div style={{ display: "flex", gap: "16px", alignItems: "baseline" }}>
-          <span className="okwe-call" style={{ fontWeight: 700 }}>
-            {String(n).padStart(2, "0")}
-          </span>
-          <span className="okwe-call" style={{ color: "var(--text-muted)" }}>
-            {title}
-          </span>
-        </div>
-      )}
-      <div style={{ minWidth: 0, gridColumn: wide ? "1" : "2" }}>{children}</div>
+        )}
+      </div>
+      <div className={css.proofBody}>{children}</div>
     </section>
   );
 }
@@ -99,33 +81,21 @@ export default function ProofsPage() {
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
-      <main
-        style={{
-          maxWidth: 1240,
-          margin: "0 auto",
-          padding: "48px 40px 120px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "52px",
-        }}
-      >
-        <header
-          style={{
-            display: "grid",
-            gridTemplateColumns: "104px 1fr 216px",
-            gap: "28px",
-            alignItems: "end",
-            borderBottom: "var(--rule-thick) solid var(--rule-ink)",
-            paddingBottom: "20px",
-          }}
-        >
-          <CallNumber
-            series="Research"
-            issue={1}
-            orientation="horizontal"
-            style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}
-          />
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+      <main className={css.page}>
+        <header className={css.header}>
+          <div className={css.headCall}>
+            <CallNumber
+              series="Research"
+              issue={1}
+              orientation="horizontal"
+              style={{
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 8,
+              }}
+            />
+          </div>
+          <div className={css.headTitle}>
             <Link
               href="/"
               className="okwe-block-link okwe-call"
@@ -133,18 +103,16 @@ export default function ProofsPage() {
             >
               ← Operating system
             </Link>
-            <h1 style={{ fontSize: "var(--size-4xl)" }}>Twelve content proofs</h1>
+            <h1>Twelve content proofs</h1>
           </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-4)",
-              alignItems: "flex-start",
-            }}
-          >
+          <div className={css.headAside}>
             <PlateSwitch />
-            <p style={{ font: "var(--type-caption)", color: "var(--text-muted)" }}>
+            <p
+              style={{
+                font: "var(--type-caption)",
+                color: "var(--text-muted)",
+              }}
+            >
               The identity tested on real content, not on a brand slide. The wordmark appears only
               in the register foot of published canvases — cover it and the system still reads as
               Okwe.
@@ -199,7 +167,7 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={3} title="Statistic" note="Counted, then sourced">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "32px" }}>
+          <div className={css.stats}>
             <StatBlock
               figure="61"
               unit="%"
@@ -227,39 +195,65 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={4} title="Complex diagram" note="The manifest" wide>
-          <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-            <ManifestDiagram
-              stages={[
-                { input: "Question", label: "Research", state: "Field measurement or primary source" },
-                { input: "Research", label: "Content", state: "Published with method and gaps" },
-                {
-                  input: "Content",
-                  label: "Audience",
-                  state: "Questions logged in the register",
-                  mark: true,
-                },
-                { input: "Questions", label: "Product", state: "Workshop, then course" },
-                { input: "Teaching", label: "Knowledge", state: "IP the next question starts from" },
-              ]}
-              caption="The Okwe operating loop · each stage is only entered when the previous one produced evidence"
-            />
-            <ManifestDiagram
-              stages={[
-                { input: "Guangzhou", label: "Ex-works", value: "D+0" },
-                { input: "Yantian", label: "Loaded", value: "D+6" },
-                { input: "At sea", label: "In transit", value: "D+34" },
-                { input: "Apapa", label: "Berthed", value: "D+36", mark: true },
-                { input: "Customs", label: "Cleared", value: "D+41" },
-                { input: "Haulage", label: "In warehouse", value: "D+54" },
-              ]}
-              caption="One 20ft container, tracked hourly · the marked stage is where the schedule broke"
-            />
+          <p className={css.scrollHint}>Wide manifest — scroll the diagram sideways</p>
+          <div className={css.diagrams}>
+            <div className="okwe-scroll-x">
+              <ManifestDiagram
+                stages={[
+                  {
+                    input: "Question",
+                    label: "Research",
+                    state: "Field measurement or primary source",
+                  },
+                  {
+                    input: "Research",
+                    label: "Content",
+                    state: "Published with method and gaps",
+                  },
+                  {
+                    input: "Content",
+                    label: "Audience",
+                    state: "Questions logged in the register",
+                    mark: true,
+                  },
+                  {
+                    input: "Questions",
+                    label: "Product",
+                    state: "Workshop, then course",
+                  },
+                  {
+                    input: "Teaching",
+                    label: "Knowledge",
+                    state: "IP the next question starts from",
+                  },
+                ]}
+                caption="The Okwe operating loop · each stage is only entered when the previous one produced evidence"
+              />
+            </div>
+            <div className="okwe-scroll-x">
+              <ManifestDiagram
+                stages={[
+                  { input: "Guangzhou", label: "Ex-works", value: "D+0" },
+                  { input: "Yantian", label: "Loaded", value: "D+6" },
+                  { input: "At sea", label: "In transit", value: "D+34" },
+                  {
+                    input: "Apapa",
+                    label: "Berthed",
+                    value: "D+36",
+                    mark: true,
+                  },
+                  { input: "Customs", label: "Cleared", value: "D+41" },
+                  { input: "Haulage", label: "In warehouse", value: "D+54" },
+                ]}
+                caption="One 20ft container, tracked hourly · the marked stage is where the schedule broke"
+              />
+            </div>
           </div>
         </Proof>
 
         <Proof n={5} title="Case study" note="Situation · decision · result · lesson">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 216px", gap: "28px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div className={css.annotated}>
+            <div className={css.claim}>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                 <Badge tone="fact">Sourced</Badge>
                 <Badge tone="unknown">One case</Badge>
@@ -267,7 +261,7 @@ export default function ProofsPage() {
                   CF·002 · CASE FILE
                 </span>
               </div>
-              <h2 style={{ fontSize: "var(--size-2xl)" }}>A distributor who priced from the invoice</h2>
+              <h2 className={css.h2}>A distributor who priced from the invoice</h2>
               <FrameworkList
                 variant="lettered"
                 steps={[
@@ -304,15 +298,8 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={7} title="Research finding" note="Method and gaps in the margin">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 216px",
-              gap: "28px",
-              alignItems: "start",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div className={css.annotated}>
+            <div className={css.claim}>
               <span className="okwe-question">
                 Does customs clearance explain port-to-warehouse time?
               </span>
@@ -329,7 +316,7 @@ export default function ProofsPage() {
                 label="5 of 18 days attributable to clearance"
               />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className={css.notes}>
               <MarginNote role="method">
                 Hourly timestamps from berth to warehouse gate, two containers, same route and
                 agent.
@@ -343,7 +330,8 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={8} title="YouTube thumbnail" note="Reads at 210px" wide>
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "flex-start" }}>
+          <p className={css.scrollHint}>Fixed-size artwork — scroll the row sideways</p>
+          <div className={`${css.canvasRow} okwe-scroll-x`}>
             <ThumbnailCard
               series="How It Works"
               issue={9}
@@ -352,7 +340,7 @@ export default function ProofsPage() {
               duration="14 MIN"
               renderWidth={420}
             />
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div className={css.canvasSide}>
               <ThumbnailCard
                 series="The Trade Desk"
                 issue={12}
@@ -370,7 +358,7 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={9} title="Instagram carousel" note="Six parts, one document" wide>
-          <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
+          <div className={`${css.canvasRow} ${css.canvasRowTight} okwe-scroll-x`}>
             <CarouselSlide
               kind="cover"
               index={1}
@@ -451,7 +439,7 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={10} title="LinkedIn document" note="1080² parts" wide>
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+          <div className={`${css.canvasRow} ${css.canvasRowTight} okwe-scroll-x`}>
             <CarouselSlide
               canvas="square"
               kind="cover"
@@ -508,7 +496,8 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={11} title="Course cover" note="Academy" wide>
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "flex-start" }}>
+          <p className={css.scrollHint}>Fixed-size artwork — scroll the row sideways</p>
+          <div className={`${css.canvasRow} okwe-scroll-x`}>
             <PostCanvas
               canvas="landscape"
               theme="plate"
@@ -523,7 +512,11 @@ export default function ProofsPage() {
             >
               <span
                 className="okwe-display"
-                style={{ fontSize: 74, lineHeight: 0.96, color: "var(--chalk-50)" }}
+                style={{
+                  fontSize: 74,
+                  lineHeight: 0.96,
+                  color: "var(--chalk-50)",
+                }}
               >
                 Pricing an import before you buy
               </span>
@@ -539,7 +532,7 @@ export default function ProofsPage() {
                 buyer.
               </span>
             </PostCanvas>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div className={css.canvasSide}>
               <span className="okwe-source">
                 The register tally shows seats taken — the counting device doing operational work,
                 not decoration.
@@ -572,7 +565,8 @@ export default function ProofsPage() {
         </Proof>
 
         <Proof n={12} title="Report cover" note="A4" wide>
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "flex-start" }}>
+          <p className={css.scrollHint}>Fixed-size artwork — scroll the row sideways</p>
+          <div className={`${css.canvasRow} okwe-scroll-x`}>
             <PostCanvas
               canvas="report"
               theme="plate"
@@ -590,7 +584,11 @@ export default function ProofsPage() {
               </span>
               <span
                 className="okwe-display"
-                style={{ fontSize: 62, lineHeight: 0.95, color: "var(--chalk-50)" }}
+                style={{
+                  fontSize: 62,
+                  lineHeight: 0.95,
+                  color: "var(--chalk-50)",
+                }}
               >
                 Where the eighteen days go
               </span>

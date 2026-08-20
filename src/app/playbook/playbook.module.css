@@ -159,17 +159,53 @@
   margin-bottom: 32px;
 }
 
-/* On a narrow screen the rail stops being a rail and becomes a header band:
-   the document still gets the full measure. */
+/* --bp-lg (1100px): the reading column tightens before the rail folds. */
+@media (max-width: 1100px) {
+  .column { padding: 40px var(--space-8) 80px; }
+}
+
+/* --bp-md (860px): the rail stops being a rail and becomes a header band.
+   The document keeps the full measure; the nav becomes a wrapping row so the
+   six documents stay one tap away instead of costing a scroll. */
 @media (max-width: 860px) {
   .shell { height: auto; flex-direction: column; }
   .rail {
     width: 100%;
     border-right: 0;
     border-bottom: var(--rule-thick) solid var(--rule-ink);
-    padding-bottom: var(--space-5);
+    padding: var(--space-7) 0 var(--space-5);
+    overflow-y: visible;
   }
-  .railFoot { margin-top: var(--space-5); }
+  .railHead { padding: 0 var(--page-margin-fluid) var(--space-5); }
+  .railRule { margin: 0 var(--page-margin-fluid); }
+  .searchWrap { padding: var(--space-5) var(--page-margin-fluid) var(--space-2); }
+
+  /* The document list becomes a wrapping row of numbered chips. */
+  .navRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0 var(--page-margin-fluid);
+  }
+  .navRow .navItem {
+    width: auto;
+    flex: 0 1 auto;
+    padding: var(--space-3) var(--space-4);
+    border-left: 0;
+    border-bottom: var(--rule-thick) solid transparent;
+  }
+  .navRow .navItemOn {
+    border-left: 0;
+    border-bottom-color: var(--rule-mark);
+  }
+  .railLabel { padding-left: var(--page-margin-fluid) !important; padding-right: var(--page-margin-fluid) !important; }
+  .railFoot { margin-top: var(--space-5); padding: var(--space-5) var(--page-margin-fluid) 0; }
   .field { overflow-y: visible; }
-  .column { padding: 32px var(--page-margin) 72px; }
+  .column { padding: var(--space-8) var(--page-margin-fluid) 72px; }
+}
+
+/* --bp-sm (600px): tighten the register voice so it stops wrapping awkwardly. */
+@media (max-width: 600px) {
+  .navTitle { font-size: var(--size-xs); }
+  .docHead { font-size: 10px; }
 }

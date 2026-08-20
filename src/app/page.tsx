@@ -29,7 +29,7 @@ export default function IndexPage() {
         style={{
           width: "100%",
           maxWidth: "var(--page-max)",
-          padding: "40px var(--page-margin) 72px",
+          padding: "40px var(--page-margin-fluid) 72px",
           display: "flex",
           flexDirection: "column",
         }}
@@ -82,7 +82,10 @@ export default function IndexPage() {
           <Logo variant="stacked" knowledge size={28} />
           <h1
             style={{
-              fontSize: 56,
+              // The source sets a flat 56px. The identity is the expanded
+              // width, not the absolute size, so it scales with the viewport
+              // and keeps its 118% stretch rather than overrunning a phone.
+              fontSize: "clamp(30px, 8.5vw, 56px)",
               lineHeight: 0.98,
               maxWidth: "18ch",
               textWrap: "pretty",
@@ -93,6 +96,7 @@ export default function IndexPage() {
           <p
             style={{
               font: "var(--type-lede)",
+              fontSize: "clamp(16px, 4.2vw, var(--size-lg))",
               color: "var(--text-body)",
               maxWidth: "56ch",
             }}

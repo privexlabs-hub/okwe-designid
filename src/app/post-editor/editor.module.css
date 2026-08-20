@@ -1,0 +1,331 @@
+/* ============================================================================
+   POST EDITOR — responsive frame.
+   Custom properties cannot be read inside @media, so the literal pixel values
+   below are the breakpoint tokens by another name:
+     600px  = --bp-sm    (phone)
+     1100px = --bp-lg    (the tool layouts fold)
+   Order of collapse, widest to narrowest:
+     1. >=1100px  three panels: rail | stage+strip | inspector
+     2. 600-1100  the template rail folds into a drawer, inspector narrows
+     3. <600      one column, natural document flow: bar, stage, strip,
+                  inspector — the page scrolls, nothing is clipped.
+   Square corners, rules not boxes, no shadows.
+   ========================================================================== */
+
+.shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-page);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.centre {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Template rail ------------------------------------------------------ */
+.railSlot {
+  flex: none;
+  width: 264px;
+  min-width: 0;
+  display: flex;
+}
+
+.rail {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  border-right: var(--rule-thin) solid var(--rule-quiet);
+  background: var(--surface-field);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Only ever visible while the rail is a drawer (see the 1100px block). */
+.backdropOpen {
+  display: none;
+}
+
+/* The "Templates" button only exists once the rail has folded away. */
+.railToggle {
+  display: none;
+}
+
+/* ---- Stage -------------------------------------------------------------- */
+.stage {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  background: var(--surface-inset);
+  display: grid;
+  place-items: center;
+  padding: var(--space-9);
+}
+
+.stageInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.stageMeta {
+  font: var(--type-data);
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-5);
+}
+
+/* ---- Inspector ---------------------------------------------------------- */
+.inspector {
+  width: 320px;
+  flex: none;
+  border-left: var(--rule-thin) solid var(--rule-quiet);
+  background: var(--surface-field);
+  overflow-y: auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Two fields side by side — they go one-up while the inspector is narrow. */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+/* ---- Top bar ------------------------------------------------------------ */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-7);
+  border-bottom: var(--rule-thin) solid var(--rule-quiet);
+  background: var(--surface-field);
+}
+
+.topBarLeft,
+.topBarRight {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.topBarLeft {
+  gap: var(--space-5);
+}
+
+/* ---- Slide strip -------------------------------------------------------- */
+.strip {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-7);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  background: var(--surface-field);
+}
+
+.stripScroll {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: var(--space-2);
+  -webkit-overflow-scrolling: touch;
+}
+
+.stripItem {
+  flex: none;
+  min-width: 104px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.stripActions {
+  display: flex;
+  gap: var(--space-2);
+  flex: none;
+}
+
+/* ---- Export dialog file rows -------------------------------------------- */
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.fileName {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.fileButton {
+  flex: none;
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  letter-spacing: var(--tracking-call);
+  text-transform: uppercase;
+  border: var(--rule-thin) solid var(--rule-ink);
+  border-radius: var(--radius-0);
+  background: var(--surface-field);
+  color: var(--text-primary);
+  height: 22px;
+  padding: 0 var(--space-3);
+  cursor: pointer;
+}
+
+.fileButton:disabled {
+  border-color: var(--rule-quiet);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+/* ==== 600px (--bp-sm) to 1100px (--bp-lg) ================================= */
+@media (max-width: 1100px) {
+  .railSlot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 41;
+    width: min(264px, 86vw);
+    display: none;
+  }
+
+  .railSlot.railOpen {
+    display: flex;
+  }
+
+  .railOpen .rail {
+    border-right: var(--rule-thick, 2px) solid var(--rule-ink);
+  }
+
+  .backdropOpen {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    border: 0;
+    padding: 0;
+    background: var(--overlay-scrim);
+    cursor: pointer;
+  }
+
+  .railToggle {
+    display: inline-flex;
+  }
+
+  .inspector {
+    width: 264px;
+    padding: var(--space-5);
+  }
+
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stage {
+    padding: var(--space-7);
+  }
+}
+
+/* ==== below 600px (--bp-sm): one column, natural flow ===================== */
+@media (max-width: 600px) {
+  .shell {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .body {
+    flex: none;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .centre {
+    flex: none;
+    min-width: 0;
+  }
+
+  .stage {
+    flex: none;
+    overflow: visible;
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .inspector {
+    width: auto;
+    flex: none;
+    border-left: 0;
+    border-top: var(--rule-thin) solid var(--rule-quiet);
+    overflow-y: visible;
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .topBar {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .topBarLeft,
+  .topBarRight {
+    gap: var(--space-3);
+  }
+
+  .topBarRight {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  /* Secondary actions and decoration step aside; Export always stays. */
+  .hideOnPhone {
+    display: none;
+  }
+
+  .strip {
+    padding: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  .stripScroll {
+    flex: 1 1 100%;
+  }
+
+  .stripActions {
+    flex: none;
+    margin-left: auto;
+  }
+}

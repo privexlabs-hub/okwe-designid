@@ -24,6 +24,7 @@ import {
   type ExportTarget,
   type PackagedFile,
 } from "@/lib/export";
+import { DownloadControl } from "@/components/DownloadControl";
 import styles from "./carousel.module.css";
 
 const PREVIEW_WIDTH = 260;
@@ -49,23 +50,37 @@ export function Carousel() {
       options: (slide.options ?? []).map((o, j) => (j === i ? { ...o, ...patch } : o)),
     });
 
+  const baseName = () =>
+    `okwe-knowledge-${slugify(deck.series)}-${slugify(deck.slides[0].title)}`;
+
+  /**
+   * One slide's export target. The node comes from the offscreen staging area,
+   * which is rendered at the true canvas width, so a single-slide download is
+   * the same 1080×1350 asset the batch produces — not the on-screen preview.
+   */
+  const targetFor = (i: number): ExportTarget | null => {
+    const node = stageRefs.current[i];
+    if (!node) return null;
+    return {
+      node,
+      width: canvas.w,
+      height: canvas.h,
+      name: `${baseName()}-slide-${String(i + 1).padStart(2, "0")}`,
+    };
+  };
+
   /** Export every slide at true 1080×1350, from the offscreen staging area. */
   async function runExport(mode: "png" | "pdf" | "zip") {
     if (busy) return;
     setBusy(true);
     setStatus({ text: "Preparing…" });
-    const base = `okwe-knowledge-${slugify(deck.series)}-${slugify(deck.slides[0].title)}`;
+    const base = baseName();
 
     try {
       const targets: ExportTarget[] = deck.slides.map((s, i) => {
-        const node = stageRefs.current[i];
-        if (!node) throw new ExportError(`Slide ${i + 1} is not rendered yet — try again.`);
-        return {
-          node,
-          width: canvas.w,
-          height: canvas.h,
-          name: `${base}-slide-${String(i + 1).padStart(2, "0")}`,
-        };
+        const t = targetFor(i);
+        if (!t) throw new ExportError(`Slide ${i + 1} is not rendered yet — try again.`);
+        return t;
       });
 
       if (mode === "pdf") {
@@ -111,35 +126,45 @@ export function Carousel() {
       <div className={styles.work}>
         <div className={styles.deck}>
           {deck.slides.map((s, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setActive(i)}
-              aria-pressed={i === active}
-              className={`${styles.slot} ${i === active ? styles.slotOn : ""}`}
-            >
-              <span className={styles.slotMeta}>
-                <span>{String(i + 1).padStart(2, "0")} / 06</span>
-                <span>{s.kind}</span>
-              </span>
-              <CarouselSlide
-                kind={s.kind}
-                canvas="portrait"
-                theme={s.theme}
-                index={i + 1}
-                total={deck.slides.length}
-                series={deck.series}
-                issue={deck.issue}
-                date={deck.date}
-                renderWidth={PREVIEW_WIDTH}
-                eyebrow={s.eyebrow}
-                title={s.title}
-                body={s.body}
-                items={slideItems(s)}
-                principle={s.principle}
-                cta={s.cta}
+            <div key={i} className={`${styles.slot} ${i === active ? styles.slotOn : ""}`}>
+              <button
+                type="button"
+                onClick={() => setActive(i)}
+                aria-pressed={i === active}
+                className={styles.slotPick}
+              >
+                <span className={styles.slotMeta}>
+                  <span>
+                    {String(i + 1).padStart(2, "0")} / {String(deck.slides.length).padStart(2, "0")}
+                  </span>
+                  <span>{s.kind}</span>
+                </span>
+                <CarouselSlide
+                  kind={s.kind}
+                  canvas="portrait"
+                  theme={s.theme}
+                  index={i + 1}
+                  total={deck.slides.length}
+                  series={deck.series}
+                  issue={deck.issue}
+                  date={deck.date}
+                  renderWidth={PREVIEW_WIDTH}
+                  eyebrow={s.eyebrow}
+                  title={s.title}
+                  body={s.body}
+                  items={slideItems(s)}
+                  principle={s.principle}
+                  cta={s.cta}
+                />
+              </button>
+              {/* Every slide is individually downloadable, in any format —
+                  you never have to take the whole set to get one asset. */}
+              <DownloadControl
+                size="sm"
+                label={`slide ${String(i + 1).padStart(2, "0")}`}
+                getTarget={() => targetFor(i)}
               />
-            </button>
+            </div>
           ))}
         </div>
 

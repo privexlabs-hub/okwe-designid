@@ -10,7 +10,7 @@
  *   - the ZIP contains every slide plus the combined PDF
  */
 import { spawn } from "node:child_process";
-import { mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
@@ -129,8 +129,72 @@ try {
     check(distinct.size > 8, `raster is not a flat fill (${distinct.size} distinct greys sampled)`);
   }
 
+  /* ---- PER-FILE export: one slide, each format ---- */
+  for (const fmt of ["png", "jpg", "pdf", "svg"]) {
+    await rm(dl, { recursive: true, force: true });
+    await mkdir(dl, { recursive: true });
+    await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: dl });
+    await cdp.send("Page.navigate", { url: BASE + "/carousel/" }, sessionId);
+    await sleep(1500);
+    await evaluate("document.fonts.ready.then(()=>true)");
+
+    // Pick the SECOND slide's control, to prove it is per-slide and not just
+    // "whatever happens to be active".
+    const picked = await evaluate(`(() => {
+      const sels = [...document.querySelectorAll("select")].filter(s =>
+        [...s.options].map(o => o.value).join(",") === "png,jpg,pdf,svg");
+      if (sels.length < 2) return "ONLY " + sels.length + " per-asset controls";
+      const sel = sels[1];
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+      setter.call(sel, ${JSON.stringify(fmt)});
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+      const btn = sel.parentElement.querySelector("button");
+      if (!btn) return "no button beside the select";
+      btn.click();
+      return "clicked";
+    })()`);
+    if (picked !== "clicked") {
+      check(false, `single-file ${fmt.toUpperCase()}: ${picked}`);
+      continue;
+    }
+
+    let files = [];
+    for (let i = 0; i < 80; i++) {
+      files = await readdir(dl);
+      if (files.length && !files.some((f) => f.endsWith(".crdownload"))) break;
+      await sleep(500);
+    }
+    const one = files.filter((f) => f.endsWith("." + fmt));
+    check(
+      one.length === 1 && files.length === 1,
+      `single-file ${fmt.toUpperCase()}: exactly one file (${files.join(", ") || "none"})`,
+    );
+    if (one.length === 1) {
+      check(/-slide-02\./.test(one[0]), `single-file ${fmt.toUpperCase()}: it is slide 02 (${one[0]})`);
+      const size = (await stat(path.join(dl, one[0]))).size;
+      check(size > 1000, `single-file ${fmt.toUpperCase()}: non-trivial (${(size / 1024).toFixed(0)} KB)`);
+      if (fmt === "png" || fmt === "jpg") {
+        const meta = await sharp(path.join(dl, one[0])).metadata();
+        check(
+          meta.width === 1080 && meta.height === 1350,
+          `single-file ${fmt.toUpperCase()}: true canvas size ${meta.width}x${meta.height}`,
+        );
+      }
+      if (fmt === "svg") {
+        const txt = await readFile(path.join(dl, one[0]), "utf8");
+        check(txt.includes("<svg"), "single-file SVG: is real SVG markup");
+        check(/@font-face|font-family/.test(txt), "single-file SVG: carries its type");
+      }
+      if (fmt === "pdf") {
+        const head = (await readFile(path.join(dl, one[0]))).subarray(0, 5).toString("latin1");
+        check(head === "%PDF-", "single-file PDF: valid PDF header");
+      }
+    }
+  }
+
   /* ---- ZIP export ---- */
   await rm(dl, { recursive: true, force: true });
+  await mkdir(dl, { recursive: true });
   await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: dl });
   await cdp.send("Page.navigate", { url: BASE + "/carousel/" }, sessionId);
   await sleep(1800);

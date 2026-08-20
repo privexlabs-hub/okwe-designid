@@ -23,6 +23,7 @@ import { StatCard } from "@/design-system/components/social/StatCard";
 import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
 
 import { ColourRamps } from "./Foundations";
+import styles from "./ds.module.css";
 import {
   DialogSpecimen,
   FormsSpecimen,
@@ -46,7 +47,7 @@ const rule3: CSSProperties = {
 /** A grid for specimens whose items differ in height — flex-wrap staggers them. */
 const grid = (min: number): CSSProperties => ({
   display: "grid",
-  gridTemplateColumns: `repeat(auto-fill,minmax(${min}px,1fr))`,
+  gridTemplateColumns: `repeat(auto-fill,minmax(min(${min}px,100%),1fr))`,
   gap: "var(--space-7)",
   alignItems: "start",
 });
@@ -104,17 +105,11 @@ function Specimen({
   children: ReactNode;
 }) {
   return (
-    <article
-      style={{
-        borderTop: "var(--rule-thin) solid var(--rule-quiet)",
-        paddingTop: "var(--space-5)",
-        display: "grid",
-        gridTemplateColumns: "var(--rail-index) 1fr",
-        columnGap: "var(--field-gutter)",
-        rowGap: "var(--space-5)",
-      }}
-    >
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+    <article className={styles.specimen}>
+      <div
+        className={styles.specimenRail}
+        style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}
+      >
         <span className="okwe-call" style={{ color: "var(--text-quiet)" }}>
           {index}
         </span>
@@ -122,7 +117,10 @@ function Specimen({
           {name}
         </span>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)", minWidth: 0 }}>
+      <div
+        className={styles.specimenBody}
+        style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)", minWidth: 0 }}
+      >
         {note && (
           <p
             style={{
@@ -200,6 +198,12 @@ export default function DesignSystemPage() {
             className="okwe-display"
             style={{
               font: "var(--type-h1)",
+              // The `font` shorthand hardcodes --size-4xl, which beats the
+              // global fluid clamp in breakpoints.css. Restate the size as a
+              // longhand after it so the headline scales on a phone instead of
+              // running off the edge — the width axis is what carries the
+              // identity, not the absolute size.
+              fontSize: "clamp(26px, 7.5vw, var(--size-4xl))",
               fontStretch: "var(--stretch-display)",
               letterSpacing: "var(--tracking-display)",
               color: "var(--text-primary)",
@@ -243,26 +247,20 @@ export default function DesignSystemPage() {
           <Specimen index="00.2" name="Type scale" note="The composed roles, each set in its own token.">
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
               {TYPE_ROLES.map((r) => (
-                <div
-                  key={r.token}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    gap: "var(--space-5)",
-                    alignItems: "baseline",
-                    borderTop: "var(--rule-thin) solid var(--rule-quiet)",
-                    paddingTop: "var(--space-3)",
-                  }}
-                >
+                <div key={r.token} className={styles.typeRow}>
                   <span className="okwe-call" style={{ color: "var(--text-muted)" }}>
                     {r.name}
                   </span>
+                  {/* A type specimen is fixed-size by nature — the register
+                      roles run to 124px. Let the line scroll in its own box on
+                      a narrow screen rather than clipping the specimen, which
+                      would misrepresent the very thing it documents. */}
                   <span
+                    className={styles.typeSpecimen}
                     style={{
                       font: `var(${r.token})`,
                       fontStretch: r.stretch,
                       color: "var(--text-primary)",
-                      overflow: "hidden",
                     }}
                   >
                     Okwe knows the register
@@ -469,7 +467,7 @@ export default function DesignSystemPage() {
           </Specimen>
 
           <Specimen index="03.3" name="Card" note="Three variants. A card is a register entry, not a box: a top rule opens it, a hairline meta line closes it.">
-            <div style={{ display: "grid", gap: "var(--space-8)", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))" }}>
+            <div style={{ display: "grid", gap: "var(--space-8)", gridTemplateColumns: "repeat(auto-fit,minmax(min(280px,100%),1fr))" }}>
               <Card
                 variant="field"
                 index={1}
@@ -622,7 +620,8 @@ export default function DesignSystemPage() {
                     part={1}
                     date="2026-06-09"
                     classMark="Fact"
-                    tally={62}
+                    tally={13}
+                    tallyTotal={20}
                   />
                 </Variant>
               ))}
@@ -715,7 +714,8 @@ export default function DesignSystemPage() {
                   unit="%"
                   label="Entries sourced"
                   source="Okwe register, 2026-06"
-                  tally={62}
+                  tally={13}
+                  total={20}
                   issue={32}
                   date="2026-06-01"
                   renderWidth={240}
@@ -728,7 +728,10 @@ export default function DesignSystemPage() {
           </Specimen>
 
           <Specimen index="06.4" name="ThumbnailCard" note="A 16:9 thumbnail. The title is set at a fixed 104u with no clamp, so anything past three lines is clipped by the card — the third specimen shows the limit.">
-            <div style={row}>
+            {/* This row deliberately exhibits a known component limitation, so
+                the responsive audit is told to expect the clipping here rather
+                than reporting it as a layout regression on every run. */}
+            <div style={row} data-known-limit="ThumbnailCard clips titles past three lines">
               <Variant name="plate">
                 <ThumbnailCard
                   title="Who pays for the wait"

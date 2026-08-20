@@ -5,31 +5,15 @@ import { PostCanvas } from "@/design-system/components/social/PostCanvas";
 import { StatCard } from "@/design-system/components/social/StatCard";
 import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
 import { ProfileRegister } from "./ProfileRegister";
+import s from "./social-kit.module.css";
 
 export const metadata: Metadata = { title: "Social profile kit" };
 
 /** OKW-SOC-KIT-01 — the profile and template kit, ported from the prototype. */
 export default function SocialKitPage() {
   return (
-    <main
-      style={{
-        maxWidth: 1240,
-        margin: "0 auto",
-        padding: "48px 32px 96px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "64px",
-      }}
-    >
-      <header
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--space-5)",
-          borderBottom: "2px solid var(--rule-ink)",
-          paddingBottom: "var(--space-7)",
-        }}
-      >
+    <main className={s.page}>
+      <header className={s.header}>
         <Link
           href="/"
           className="okwe-block-link"
@@ -53,9 +37,7 @@ export default function SocialKitPage() {
         >
           Social profile &amp; template kit
         </span>
-        <h1 style={{ font: "var(--type-h1)", letterSpacing: "var(--tracking-display)" }}>
-          One institution across eight surfaces
-        </h1>
+        <h1>One institution across eight surfaces</h1>
         <p
           style={{
             font: "var(--type-lede)",
@@ -70,18 +52,10 @@ export default function SocialKitPage() {
 
       <ProfileRegister />
 
-      <section style={{ display: "flex", flexDirection: "column", gap: "var(--space-7)" }}>
-        <h2 style={{ font: "var(--type-h2)", fontSize: "var(--size-2xl)" }}>
-          Header and feed templates
-        </h2>
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-7)",
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-          }}
-        >
+      <section className={s.section}>
+        <h2 className={s.h2}>Header and feed templates</h2>
+        <p className={s.scrollHint}>Fixed-size artwork — scroll the row sideways</p>
+        <div className={`${s.specimens} okwe-scroll-x`}>
           <figure
             style={{ margin: 0, display: "flex", flexDirection: "column", gap: "var(--space-3)" }}
           >
@@ -126,11 +100,9 @@ export default function SocialKitPage() {
         </div>
       </section>
 
-      <section style={{ display: "flex", flexDirection: "column", gap: "var(--space-7)" }}>
-        <h2 style={{ font: "var(--type-h2)", fontSize: "var(--size-2xl)" }}>
-          The six-slide carousel set
-        </h2>
-        <div style={{ display: "flex", gap: "var(--space-5)", flexWrap: "wrap" }}>
+      <section className={s.section}>
+        <h2 className={s.h2}>The six-slide carousel set</h2>
+        <div className={`${s.specimens} ${s.specimensTight} okwe-scroll-x`}>
           <CarouselSlide
             kind="cover"
             index={1}
@@ -209,16 +181,10 @@ export default function SocialKitPage() {
         </div>
       </section>
 
-      <section style={{ display: "flex", flexDirection: "column", gap: "var(--space-7)" }}>
-        <h2 style={{ font: "var(--type-h2)", fontSize: "var(--size-2xl)" }}>Data and short-form</h2>
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-7)",
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-          }}
-        >
+      <section className={s.section}>
+        <h2 className={s.h2}>Data and short-form</h2>
+        <p className={s.scrollHint}>Fixed-size artwork — scroll the row sideways</p>
+        <div className={`${s.specimens} okwe-scroll-x`}>
           <StatCard
             figure="18"
             unit="days"
@@ -247,7 +213,10 @@ export default function SocialKitPage() {
             issue={3}
             classMark="Principle"
           >
-            <span className="okwe-display" style={{ fontSize: 72, lineHeight: 1, maxWidth: "24ch" }}>
+            <span
+              className="okwe-display"
+              style={{ fontSize: 72, lineHeight: 1, maxWidth: "24ch" }}
+            >
               A price you cannot decompose is a price you cannot defend.
             </span>
           </PostCanvas>

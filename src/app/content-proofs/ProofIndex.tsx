@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from "react";
 import { proofId } from "./proofId";
+import css from "./proofs.module.css";
 
 export interface ProofRef {
   n: number;
@@ -20,20 +21,7 @@ export function ProofIndex({ proofs }: { proofs: ProofRef[] }) {
   }
 
   return (
-    <nav
-      aria-label="Proof index"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 5,
-        background: "var(--surface-page)",
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "var(--space-3) var(--space-5)",
-        padding: "var(--space-3) 0",
-        borderBottom: "var(--rule-thin) solid var(--rule-quiet)",
-      }}
-    >
+    <nav aria-label="Proof index" className={`${css.index} okwe-scroll-x`}>
       {proofs.map((p) => (
         <a
           key={p.n}

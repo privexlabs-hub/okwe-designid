@@ -80,6 +80,51 @@ browser that the axis is actually applied.
 All three families are self-hosted from `public/assets/fonts`. Nothing is
 fetched from Google at runtime.
 
+## Responsive
+
+The design system defines one structure — an index rail (104px), a reading field,
+and an annotation margin (216px). That frame is what has to survive a narrow
+screen, so the app folds it in a fixed order rather than inventing a second design:
+
+1. the **annotation margin** folds under the field — it is commentary
+2. the **index rail** folds above the field — it is a label
+3. **content grids** become one column
+
+Rules still run edge to edge, corners stay square, and headlines keep their 118%
+stretch — they scale with the viewport rather than dropping the width axis, because
+the expansion is the identity, not the absolute size.
+
+Breakpoints live in `src/design-system/tokens/breakpoints.css`:
+
+| Token | Width | What changes |
+| --- | --- | --- |
+| `--bp-xs` | 400px | small phone; fixed-size artwork scrolls in its own box |
+| `--bp-sm` | 600px | index rail folds; single column throughout |
+| `--bp-md` | 860px | headlines clamp; the playbook rail becomes a header band |
+| `--bp-lg` | 1100px | annotation margin folds; the tool layouts collapse |
+| `--bp-xl` | 1320px | the full ledger (`--page-max`) |
+
+Fixed-size publishing canvases (1080×1350 slides, 1500×500 banners, A4 report pages)
+are artwork at true pixel size — they are never squeezed. They scroll inside their
+own container so the page itself never scrolls sideways.
+
+Under `@media (pointer: coarse)` every control is raised to `--tap-min` (44px); the
+system's own controls are 26–46px, which is below the touch minimum on the small sizes.
+
+## Exporting
+
+Two paths, one implementation — `src/lib/export.ts`:
+
+- **One asset, one format.** Every canvas carries a `<DownloadControl>`: pick
+  **PNG**, **JPG**, **PDF** or **SVG** and take just that file. You never have to
+  export a whole set to get a single slide.
+- **The whole set.** The post editor's export dialog still batches every slide,
+  builds the combined PDF and packages a ZIP.
+
+Both render from the same offscreen staging node at the **true canvas size**, so a
+single-slide download is the same 1080×1350 asset the batch produces — not the
+on-screen preview. `exportOne()` is the primitive; the batch helpers call it per asset.
+
 ## Verification
 
 Everything runs against the **production static export**, not the dev server.
@@ -87,7 +132,8 @@ Everything runs against the **production static export**, not the dev server.
 ```bash
 npm run build
 npx serve out -l 4321
-npm run verify        # 47 checks across three suites
+npm run verify        # 64 checks across three suites
+npm run audit         # 42 viewport x route combinations
 ```
 
 - `scripts/verify-app.mjs` — every route renders, no console errors, **zero
@@ -99,6 +145,17 @@ npm run verify        # 47 checks across three suites
 - `scripts/verify-export.mjs` — clicks the real export buttons and checks the
   downloaded files: six PNGs at true 1080×1350, non-blank rasters with the
   webfont embedded, and a ZIP containing every slide plus the combined PDF.
+  It also drives the **per-asset** control — deliberately the *second* slide's,
+  to prove it is per-slide and not just "whatever is active" — and verifies each
+  of PNG / JPG / PDF / SVG arrives as exactly one correctly-named file, at true
+  canvas size, with a valid header and its type embedded.
+
+- `scripts/audit-responsive.mjs` — renders all seven routes at 320 / 390 / 768 /
+  1024 / 1440 / 1920 and reports page overflow, **clipped content**, **overlapping
+  panels** and sub-9px text. The clipping and overlap checks matter: a panel with
+  `overflow: hidden` reports zero page overflow while silently cutting off its own
+  children, so an unusable three-panel layout can pass a naive audit. Pass `--shots`
+  to write a screenshot per viewport×route.
 
 `npm run shots` screenshots every route for visual review.
 
@@ -150,6 +207,17 @@ Checked, and deliberately *not* changed:
   both functional, and `--shadow-dialog` is one of them: "a modal must detach from the page".
 - **`Logo` ignores `[data-theme="plate"]`** because its colours come from `tone`, which
   is the component's declared API — not a bug, just a prop the caller must pass.
+
+7. **Inline `font` shorthands were made fluid.** `font: var(--type-h1)` hardcodes
+   `--size-4xl`, which beats the global clamp in `breakpoints.css`, so headlines on
+   `/` and `/design-system` ran off a 320px screen. The size is now restated as a
+   longhand after the shorthand. An inline style always wins — a global rule cannot
+   rescue it.
+8. **`minmax(280px, 1fr)` grids became `minmax(min(280px, 100%), 1fr)`.** A fixed
+   track floor cannot shrink, so those grids overflowed narrow viewports.
+9. **The `ThumbnailCard` specimen carries `data-known-limit`.** It exists to display
+   a documented component limitation, and the audit counts it separately rather than
+   reporting the same known clip on every run — a permanently-red check gets ignored.
 
 ### Contract check
 
