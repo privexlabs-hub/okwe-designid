@@ -10,6 +10,7 @@ export interface TopBarProps {
   doc: EditorDoc;
   onExport: () => void;
   onSaveTemplate: () => void;
+  onOpenShelf: () => void;
   onPreview: () => void;
   saved: boolean;
   /** Opens the template rail once it has folded into a drawer (<1100px). */
@@ -21,6 +22,7 @@ export function TopBar({
   doc,
   onExport,
   onSaveTemplate,
+  onOpenShelf,
   onPreview,
   saved,
   onToggleRail,
@@ -56,6 +58,11 @@ export function TopBar({
       </div>
       <div className={styles.topBarRight}>
         {saved && <Badge tone="fact">Template saved</Badge>}
+        <span className={styles.hideOnPhone}>
+          <Button variant="ghost" size="sm" onClick={onOpenShelf}>
+            Drafts
+          </Button>
+        </span>
         <span className={styles.hideOnPhone}>
           <Button variant="ghost" size="sm" onClick={onSaveTemplate}>
             Save as template

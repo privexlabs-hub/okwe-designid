@@ -20,6 +20,13 @@ export function TemplateRail({ active, onPick, onPicked }: TemplateRailProps) {
   const list = TEMPLATES.filter(
     (t) => platform === "All" || t.platform === platform,
   );
+  /*
+   * The library documents thirty codes; not all of them have a renderer. Split
+   * them rather than faking the gap — a documented template is listed with the
+   * reason it is not buildable yet, and is deliberately not a button.
+   */
+  const buildable = list.filter((t) => (t.status ?? "rendered") === "rendered");
+  const documented = list.filter((t) => (t.status ?? "rendered") !== "rendered");
 
   return (
     <aside id="template-rail" aria-label="Templates" className={styles.rail}>
@@ -75,7 +82,7 @@ export function TemplateRail({ active, onPick, onPicked }: TemplateRailProps) {
         </div>
       </div>
       <div style={{ overflowY: "auto", flex: 1 }}>
-        {list.map((t) => {
+        {buildable.map((t) => {
           const on = t.code === active;
           return (
             <button
@@ -126,6 +133,24 @@ export function TemplateRail({ active, onPick, onPicked }: TemplateRailProps) {
             </button>
           );
         })}
+
+        {documented.length > 0 && (
+          <div className={styles.documented} data-doc-only>
+            <span className={styles.documentedHeading}>
+              Documented · not yet rendered
+            </span>
+            {documented.map((t) => (
+              <div key={t.code} className={styles.documentedRow}>
+                <span className={styles.documentedName}>{t.name}</span>
+                <span className={styles.documentedCode}>
+                  {t.code} · {t.canvas}
+                  {t.status === "held" ? " · held" : ""}
+                </span>
+                {t.note && <span className={styles.documentedNote}>{t.note}</span>}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </aside>
   );

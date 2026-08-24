@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Dialog } from "@/design-system/components/core/Dialog";
 import { CANVASES } from "@/design-system/components/social/PostCanvas";
 import { TEMPLATES } from "@/content/templates";
@@ -18,7 +18,10 @@ import { TemplateRail } from "./TemplateRail";
 import { TopBar } from "./TopBar";
 import { DownloadControl } from "@/components/DownloadControl";
 import type { ExportTarget } from "@/lib/export";
-import { slideName } from "./naming";
+import { baseName, slideName } from "./naming";
+import { DraftsDialog } from "./DraftsDialog";
+import { useAutosave } from "@/lib/useAutosave";
+import { HANDOFF_KEY, readAutosave, readOnce, saveDraft } from "@/lib/store";
 import styles from "./editor.module.css";
 
 const START: EditorDoc = {
@@ -84,6 +87,7 @@ export function Editor() {
   const [previewing, setPreviewing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
+  const [shelf, setShelf] = useState(false);
 
   const nodes = useRef<(HTMLDivElement | null)[]>([]);
   const registerNode = useCallback((i: number, node: HTMLDivElement | null) => {
@@ -134,13 +138,114 @@ export function Editor() {
                 "Duty and VAT",
               ]
             : undefined,
+        // Labelled rows: comparison carries verdicts, compare and rank carry values.
+        options:
+          k === "comparison"
+            ? d.slides.find((s) => s.options)?.options || [
+                { title: "Invoice + margin", body: "Fast. Usually wrong." },
+                { title: "Landed cost + margin", body: "Slower. Defensible." },
+              ]
+            : k === "compare"
+              ? d.slides.find((s) => s.options)?.options || [
+                  { title: "Invoice only", value: "61" },
+                  { title: "Landed cost", value: "100" },
+                ]
+              : k === "rank"
+                ? d.slides.find((s) => s.options)?.options || [
+                    { title: "Unit cost", value: "4.10" },
+                    { title: "Duty, levies, VAT", value: "1.35" },
+                    { title: "Freight and origin", value: "0.90" },
+                    { title: "Clearing and terminal", value: "0.42" },
+                    { title: "Inland and losses", value: "0.30" },
+                  ]
+                : undefined,
+        events:
+          k === "timeline"
+            ? d.slides.find((s) => s.events)?.events || [
+                { date: "D+0", label: "Ex-works" },
+                { date: "D+6", label: "Loaded" },
+                { date: "D+36", label: "Berthed", mark: true },
+                { date: "D+41", label: "Cleared" },
+                { date: "D+54", label: "In warehouse" },
+              ]
+            : undefined,
+        /*
+         * Always empty for a data asset — never inherited.
+         *
+         * Carrying another slide's source forward would attach a provenance
+         * line to a figure it does not describe, and would quietly satisfy the
+         * export gate. Each data asset earns its own source.
+         */
+        source:
+          k === "stat" || k === "compare" || k === "rank" || k === "timeline"
+            ? ""
+            : undefined,
       }));
       nodes.current = [];
       return { ...d, template: t, slides, active: 0 };
     });
 
+  /**
+   * Replace the whole document.
+   *
+   * `nodes.current` MUST be cleared alongside it. The staging refs are keyed by
+   * slide index, so a document swap without a reset exports the previous deck —
+   * a silently wrong file, which is worse than a crash. `pick()` already does
+   * this; every other whole-document path has to as well.
+   */
+  const replaceDoc = useCallback((next: EditorDoc) => {
+    nodes.current = [];
+    setDoc(next);
+  }, []);
+
+  /**
+   * First load owns the document exactly once: either the question register's
+   * seed or the autosaved working document, never both.
+   *
+   * The search check and the handoff read are deliberately in the SAME effect.
+   * Splitting them across two effects would make correctness depend on hook
+   * declaration order, which is a trap for whoever reorders them next.
+   */
+  useEffect(() => {
+    if (window.location.search.includes("seed=register")) {
+      const handoff = readOnce<{
+        kind: string;
+        seed: { title?: string; eyebrow?: string; date?: string };
+      }>(HANDOFF_KEY);
+      // Clear the flag so a reload does not try to seed again.
+      window.history.replaceState({}, "", window.location.pathname);
+      if (handoff?.seed) {
+        nodes.current = [];
+        setDoc((d) => ({
+          ...d,
+          active: 0,
+          slides: d.slides.map((s, i) =>
+            i === 0
+              ? {
+                  ...s,
+                  title: handoff.seed.title ?? s.title,
+                  eyebrow: handoff.seed.eyebrow ?? s.eyebrow,
+                }
+              : s,
+          ),
+        }));
+        return; // the seed wins over yesterday's working document
+      }
+    }
+
+    const stored = readAutosave<EditorDoc>("post");
+    if (stored) {
+      nodes.current = [];
+      setDoc(stored);
+    }
+  }, []);
+
+  // Restore is handled above, so the hook is used purely as the debounced writer.
+  useAutosave<EditorDoc>("post", doc, () => {}, { skipRestore: true });
+
   const saveTemplate = () => {
-    setSaved(true);
+    const result = saveDraft("post", baseName(doc), doc);
+    setSaved(result.ok);
     window.setTimeout(() => setSaved(false), 2400);
   };
 
@@ -153,6 +258,7 @@ export function Editor() {
         saved={saved}
         onExport={() => setExporting(true)}
         onSaveTemplate={saveTemplate}
+        onOpenShelf={() => setShelf(true)}
         onPreview={() => setPreviewing(true)}
         onToggleRail={() => setRailOpen((o) => !o)}
         railOpen={railOpen}
@@ -188,7 +294,16 @@ export function Editor() {
           />
           <SlideStrip doc={doc} set={set} targetFor={targetFor} />
         </div>
-        <Inspector doc={doc} slide={slide} set={set} setSlide={setSlide} />
+        <Inspector
+          doc={doc}
+          slide={slide}
+          set={set}
+          setSlide={setSlide}
+          setActive={(i) => set({ active: i })}
+          onScore={(id, value) =>
+            setDoc((d) => ({ ...d, score: { ...(d.score ?? {}), [id]: value } }))
+          }
+        />
       </div>
 
       {/* Laid out offscreen so every slide can be captured, not just the active one. */}
@@ -219,6 +334,19 @@ export function Editor() {
           onClose={() => setExporting(false)}
           getNodes={getNodes}
           targetFor={targetFor}
+        />
+      )}
+
+      {shelf && (
+        <DraftsDialog<EditorDoc>
+          kind="post"
+          current={doc}
+          suggestedName={baseName(doc)}
+          onOpen={(next) => {
+            replaceDoc(next);
+            setShelf(false);
+          }}
+          onClose={() => setShelf(false)}
         />
       )}
     </div>

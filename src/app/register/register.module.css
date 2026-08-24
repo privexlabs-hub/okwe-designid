@@ -1,0 +1,267 @@
+/* OKW-REG-01 — the question register, laid out as a ledger.
+   Breakpoint literals mirror the tokens in design-system/tokens/breakpoints.css
+   (custom properties cannot be read inside @media). */
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--space-9) var(--page-margin-fluid) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  border-bottom: var(--rule-thick) solid var(--rule-ink);
+  padding-bottom: var(--space-7);
+}
+
+.back {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow {
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.lede {
+  font: var(--type-lede);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+.section { display: flex; flex-direction: column; gap: var(--space-6); }
+.h2 { font-size: var(--size-2xl); }
+/* --bp-md: 860px */
+@media (max-width: 860px) { .h2 { font-size: clamp(23px, 5.4vw, var(--size-2xl)); } }
+
+.mono {
+  font: var(--type-data);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Filter chips --------------------------------------------------------- */
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filterGroup {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.chip {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  display: inline-flex;
+}
+.count { font: var(--type-data); color: var(--text-muted); }
+
+/* ---- The ledger rows ------------------------------------------------------
+   index rail = the priority figure and the source label
+   field      = the question, its tally and its actions
+   margin     = date, occurrences, answerability
+   The margin folds first, then the rail narrows, then everything stacks. */
+.rows { display: flex; flex-direction: column; }
+
+.row {
+  display: grid;
+  grid-template-columns: var(--rail-index) minmax(0, 1fr) var(--rail-margin);
+  grid-template-areas: "rail field margin";
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  align-items: start;
+}
+
+.rail {
+  grid-area: rail;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.priority {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-2xl);
+  line-height: 1;
+  color: var(--text-primary);
+}
+.priorityLabel {
+  font: var(--type-caption);
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-quiet);
+  overflow-wrap: anywhere;
+}
+
+.field {
+  grid-area: field;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.question {
+  font: var(--type-body);
+  color: var(--text-body);
+  max-width: var(--measure-body);
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.note {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  max-width: var(--measure-body);
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.tallyRow {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.actions {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.margin {
+  grid-area: margin;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.marginLine {
+  font: var(--type-data);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* --bp-lg: 1100px — the annotation margin folds under the field. */
+@media (max-width: 1100px) {
+  .row {
+    grid-template-columns: var(--rail-index) minmax(0, 1fr);
+    grid-template-areas:
+      "rail field"
+      ".    margin";
+  }
+  .margin { flex-direction: row; flex-wrap: wrap; gap: var(--space-5); }
+}
+
+/* --bp-md: 860px — the rail narrows to 64px. */
+@media (max-width: 860px) {
+  .row {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .priority { font-size: var(--size-xl); }
+}
+
+/* --bp-sm: 600px — one column; the priority figure keeps its own line so the
+   register still reads as numbered. */
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "rail"
+      "field"
+      "margin";
+    gap: var(--space-4);
+  }
+  .rail { flex-direction: row; align-items: baseline; gap: var(--space-3); }
+  .actions { gap: var(--space-3); }
+}
+
+/* ---- The add form --------------------------------------------------------- */
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: end;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-6);
+}
+.formWide { grid-column: 1 / -1; }
+/* --bp-sm: 600px */
+@media (max-width: 600px) {
+  .form { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- The cost scale, in a ruled aside ------------------------------------- */
+.aside {
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  border-bottom: var(--rule-thin) solid var(--rule-quiet);
+  padding: var(--space-5) 0 var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.asideHead {
+  font: var(--type-label);
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.scale {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+}
+/* --bp-md: 860px */
+@media (max-width: 860px) { .scale { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* --bp-sm: 600px */
+@media (max-width: 600px) { .scale { grid-template-columns: minmax(0, 1fr); } }
+
+.scaleItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-left: var(--rule-thick) solid var(--rule-quiet);
+  padding-left: var(--space-4);
+  min-width: 0;
+}
+.scaleValue {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--size-sm);
+  color: var(--text-primary);
+}
+.scaleNote { font: var(--type-caption); color: var(--text-muted); overflow-wrap: anywhere; }
+
+.formula {
+  font: var(--type-data);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}

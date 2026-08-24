@@ -1,5 +1,5 @@
 /**
- * The six register entries on the index page.
+ * The seven register entries on the index page.
  * Copy is verbatim from "Okwe Knowledge.dc.html"; only the hrefs are rewritten
  * from Design Canvas file paths to Next routes.
  */
@@ -54,6 +54,13 @@ export const ENTRIES: RegisterEntry[] = [
     meta: "30 + 90 DAYS · IN THE PLAYBOOK",
     href: "/playbook#content-playbook--30-day-launch-plan",
   },
+  {
+    num: "07",
+    title: "Question register",
+    body: "The most valuable file in the company. Every question from a comment, DM, workshop or conversation — where it came from, when it arrived, how often it has appeared, and whether we can answer it with evidence. Priority is frequency times the cost of getting it wrong.",
+    meta: "OKW-REG-01 · KEPT IN THIS BROWSER",
+    href: "/register",
+  },
 ];
 
 /** Header line and register foot, verbatim from the source document. */
@@ -61,6 +68,6 @@ export const MASTHEAD = {
   callNumber: "OKW·OS/01 · OPERATING SYSTEM · 19 AUG 2026",
   strapline: "TWO PEOPLE · THREE PILLARS · ONE REGISTER",
   headline: "The publishing operating system",
-  lede: "How Okwe looks, how it sounds, what it publishes, how one idea becomes many assets, and how content becomes products. Six entries. Everything a two-person team needs to publish from day one.",
+  lede: "How Okwe looks, how it sounds, what it publishes, how one idea becomes many assets, and how content becomes products. Seven entries. Everything a two-person team needs to publish from day one.",
   destination: "okweknowledge.com · one idea a week",
 } as const;

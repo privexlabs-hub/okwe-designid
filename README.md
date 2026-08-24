@@ -29,6 +29,7 @@ notation — no runtime, no backend, no third-party requests.
 | `/social-kit` | `social-kit/SocialKit.jsx` | Eight profiles with tier filtering and copy-to-clipboard bios, plus the template set at true canvas sizes. |
 | `/content-proofs` | `content-proofs/Proofs.jsx` | The twelve proofs, with a working plate-mode switch and a jump index. |
 | `/carousel` | `carousel/SocialCarousel.dc.html` | The six-part set at 1080×1350, editable in place and exportable. |
+| `/register` | `content-playbook` (04) | The question register — *"the most valuable file in the company"*. Five documented fields, priority = frequency × cost of getting it wrong, promote-a-question-into-a-draft. |
 | `/design-system` | `_ds/…/_ds_bundle.js` | Every component on one specimen sheet, so consistency is checked rather than assumed. Includes the five colour ramps (hex read back from the live custom properties), the type scale, a width-contrast specimen, and a plate-mode block. |
 
 ## How it is built
@@ -132,8 +133,8 @@ Everything runs against the **production static export**, not the dev server.
 ```bash
 npm run build
 npx serve out -l 4321
-npm run verify        # 64 checks across three suites
-npm run audit         # 42 viewport x route combinations
+npm run verify        # 99 checks across four suites
+npm run audit         # 48 viewport x route combinations
 ```
 
 - `scripts/verify-app.mjs` — every route renders, no console errors, **zero
@@ -157,7 +158,52 @@ npm run audit         # 42 viewport x route combinations
   children, so an unusable three-panel layout can pass a naive audit. Pass `--shots`
   to write a screenshot per viewport×route.
 
+- `scripts/verify-additions.mjs` — the four additions: autosave survives a reload and the shelf
+  saves/lists/deletes; the ten criteria render, score 50/50, and report the hard stop; the full
+  banned list, emoji and exclamation marks are flagged deck-wide; a data asset with no source
+  refuses to export; each new data card renders at its true canvas size; documented-but-unrendered
+  templates are plain rows, never buttons; and promoting a question lands on the editor with the
+  handoff key consumed exactly once.
+
 `npm run shots` screenshots every route for visual review.
+
+## The editorial operating system
+
+The playbook does not only describe a brand — it commissions tools, and specifies most of them
+down to field names and thresholds. These are those tools:
+
+**The question register** (`/register`) sits at the front of the
+`Question → Research → Content → Audience → Product` loop. Five documented fields, sorted by the
+documented formula `priority = frequency × cost of getting it wrong`. The playbook gives no cost
+scale, so ours is four levels — and it is **rendered on the page**, not hidden in code. A question
+can be promoted straight into a draft.
+
+**The publishing gate** (`src/lib/quality.ts`) implements the score as written: ten criteria at
+0–5, threshold ≥35/50, nothing below 3, and a hard stop if accuracy or evidence falls under 3.
+Unscored criteria are *absent*, not zero — *"a piece nobody scored is a piece nobody owns."* The
+banned vocabulary is the full documented list plus emoji and exclamation marks, checked across the
+whole deck rather than the active slide.
+
+Exactly **one rule refuses an export**: *"no data template renders without a source field filled."*
+Everything else warns and asks a person to tick *"Export anyway — I own this decision."* The score
+is an editorial act, not an automated lock; the source line is non-negotiable. A figure that was
+never measured gets the playbook's exact words via a checkbox —
+*"Illustrative example — not a measured figure."*
+
+**Drafts** (`src/lib/store.ts`) keep work in the browser. A versioned envelope stores an opaque
+document per kind, so the editor's and the carousel's incompatible models are served side by side
+without being merged. Autosave restores in an effect, never from `useState` — seeding state from
+storage is a hydration mismatch, and the honest cost is one frame of the default document.
+
+**The template library** grew from 8 to 33 of the 30 documented codes plus variants: 23 the editor
+can honestly render, 9 listed as *documented, not yet rendered* with the reason, and 1 held —
+`OKW-ACA-CERT-01`, which the playbook itself withholds *"until outcomes are assessable."* The
+unrendered ones are plain rows, never buttons, so nothing offers to open a template that does not
+exist.
+
+Three new data cards complete the `DAT` domain, each composed on `PostCanvas` like `StatCard`:
+`ComparisonCard` (two tallies, ink versus sulphur), `RankCard` (numbered rows, capped at eight) and
+`TimelineCard` (one hairline, square-ended ticks, capped at six). No arrows, no curves, no dots.
 
 ## Known limits
 

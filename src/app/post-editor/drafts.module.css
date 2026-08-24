@@ -1,0 +1,99 @@
+/* The drafts shelf: a register, not a table of boxes.
+   Rows are opened by a hairline and indexed by a mono number. Square corners,
+   no shadows, no fills — the Dialog frame carries the only shadow in the system. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.label {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.saveRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.message {
+  font: var(--type-caption);
+  color: var(--text-secondary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.empty {
+  font: var(--type-body-sm);
+  color: var(--text-muted);
+  max-width: var(--measure-narrow);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--rail-index) minmax(0, 1fr) auto;
+  gap: var(--space-5);
+  align-items: baseline;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding: var(--space-4) 0;
+  min-width: 0;
+}
+
+.num {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-quiet);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.name {
+  font: var(--type-h4);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  letter-spacing: var(--tracking-call);
+  color: var(--text-quiet);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* --bp-sm (600px): the index rail folds above the row, and the actions take
+   their own line so every target keeps its width on a phone. */
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  .actions {
+    justify-content: flex-start;
+  }
+}

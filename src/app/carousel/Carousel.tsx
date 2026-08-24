@@ -25,6 +25,7 @@ import {
   type PackagedFile,
 } from "@/lib/export";
 import { DownloadControl } from "@/components/DownloadControl";
+import { useAutosave } from "@/lib/useAutosave";
 import styles from "./carousel.module.css";
 
 const PREVIEW_WIDTH = 260;
@@ -32,6 +33,16 @@ const PREVIEW_WIDTH = 260;
 export function Carousel() {
   const [deck, setDeck] = useState<CarouselDraft>(CAROUSEL_START);
   const [active, setActive] = useState(0);
+
+  /*
+   * Keep the working deck in this browser. The staging refs are keyed by slide
+   * index, so a restored deck must clear them or an export would capture the
+   * previous set.
+   */
+  useAutosave<CarouselDraft>("carousel", deck, (restored) => {
+    stageRefs.current = [];
+    setDeck(restored);
+  });
   const [status, setStatus] = useState<{ text: string; error?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const stageRefs = useRef<(HTMLDivElement | null)[]>([]);

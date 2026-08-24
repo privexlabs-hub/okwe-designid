@@ -329,3 +329,210 @@
     margin-left: auto;
   }
 }
+
+/* ---- Editorial score ----------------------------------------------------
+   Ten criteria, 0-5 each. The selector is six ruled squares, not a slider and
+   not an icon — the system counts in squares. Sulphur marks the total only
+   when the piece clears; it never fills anything behind text. */
+
+.scoreBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.scoreRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: var(--rule-hair) solid var(--rule-quiet);
+  padding-top: var(--space-3);
+}
+
+.scoreLabel {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}
+
+.scoreScale {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scoreDot {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  cursor: pointer;
+  border: var(--rule-thin) solid var(--rule-quiet);
+  border-radius: var(--radius-0);
+  background: var(--surface-field);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  transition: var(--transition-control);
+}
+.scoreDot:hover { background: var(--interactive-quiet-hover); }
+.scoreDotOn {
+  border-color: var(--rule-ink);
+  color: var(--text-primary);
+  font-weight: var(--weight-bold);
+}
+
+.scoreValue {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-quiet);
+}
+
+.scoreTotal {
+  display: flex;
+  justify-content: space-between;
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding-top: var(--space-3);
+  margin-top: var(--space-2);
+  font: var(--type-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+/* Sulphur marks the cleared threshold — a mark, not a fill. */
+.scoreTotalClear {
+  border-top-color: var(--rule-mark);
+  color: var(--text-primary);
+}
+
+.scoreNote {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  max-width: var(--measure-note);
+}
+
+/* ---- Language flags ---- */
+
+.flagList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.flagRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  cursor: pointer;
+  border: 0;
+  border-left: var(--rule-thick) solid var(--rule-mark);
+  background: transparent;
+  padding: var(--space-2) 0 var(--space-2) var(--space-4);
+  transition: var(--transition-control);
+}
+.flagRow:hover { background: var(--interactive-quiet-hover); }
+
+.flagWhere {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: 10px;
+  letter-spacing: var(--tracking-call);
+  color: var(--text-quiet);
+}
+
+.flagWhat {
+  font: var(--type-body-sm);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* ---- The export gate ----------------------------------------------------
+   One rule refuses (a data asset with no source); everything else warns and
+   asks a human to take responsibility. Opened by a 3px rule, like any entry. */
+
+.gateBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding: var(--space-5) 0;
+  margin-bottom: var(--space-6);
+}
+
+.gateHeading {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.gateReason {
+  font: var(--type-body-sm);
+  color: var(--text-primary);
+  max-width: var(--measure-body);
+}
+
+.gateNote {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  max-width: var(--measure-body);
+}
+
+.gateClear {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  border-top: var(--rule-hair) solid var(--rule-quiet);
+  padding-top: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+/* ---- Documented but not yet rendered ------------------------------------
+   The library names thirty codes; the editor renders the ones it can build
+   honestly. The rest are listed with the reason, as plain rows — never
+   buttons, so nothing offers to open a template that does not exist. */
+
+.documented {
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.documentedHeading {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.documentedRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: var(--rule-hair) solid var(--rule-quiet);
+  padding-top: var(--space-3);
+}
+
+.documentedName {
+  font: var(--type-h4);
+  color: var(--text-secondary);
+}
+
+.documentedCode {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: 0.04em;
+  color: var(--text-quiet);
+}
+
+.documentedNote {
+  font: var(--type-caption);
+  color: var(--text-muted);
+}

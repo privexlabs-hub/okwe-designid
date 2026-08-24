@@ -19,6 +19,8 @@ import {
 } from "@/lib/export";
 import type { ExportTarget, SingleFormat } from "@/lib/export";
 import type { EditorDoc } from "@/content/templates";
+import { blockedReasons, scanText, verdictFor } from "@/lib/quality";
+import { deckFields } from "./Inspector";
 import { baseName, slideName } from "./naming";
 import styles from "./editor.module.css";
 
@@ -59,6 +61,23 @@ export function ExportDialog({
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const [one, setOne] = useState("");
+  const [override, setOverride] = useState(false);
+
+  /*
+   * The gate.
+   *
+   * One rule refuses: "no data template renders without a source field filled."
+   * Everything else warns and lets a human take responsibility — the playbook
+   * frames the score as an editorial act, not an automated lock.
+   */
+  const reasons = blockedReasons({
+    slides: doc.slides,
+    contentType: doc.contentType,
+  });
+  const flags = scanText(deckFields(doc));
+  const verdict = verdictFor(doc.score ?? {});
+  const warns = !verdict.meetsThreshold || flags.length > 0;
+  const gateHolds = reasons.length > 0 || (warns && !override);
 
   const base = baseName(doc);
   const name = (i: number) => slideName(doc, i);
@@ -209,7 +228,7 @@ export function ExportDialog({
           <Button
             variant="mark"
             onClick={run}
-            disabled={busy || delivered.length === 0}
+            disabled={busy || delivered.length === 0 || gateHolds}
           >
             {busy
               ? progress || "Exporting…"
@@ -218,6 +237,46 @@ export function ExportDialog({
         </>
       }
     >
+      {reasons.length > 0 ? (
+        <div className={styles.gateBlock}>
+          <span className={styles.gateHeading}>Cannot export</span>
+          {reasons.map((r) => (
+            <p key={r} className={styles.gateReason}>
+              {r}
+            </p>
+          ))}
+          <p className={styles.gateNote}>
+            Every data asset carries a source line. If the number is not measured, tick “this
+            number is illustrative” in the inspector.
+          </p>
+        </div>
+      ) : warns ? (
+        <div className={styles.gateBlock}>
+          <span className={styles.gateHeading}>Warnings</span>
+          {!verdict.meetsThreshold && (
+            <p className={styles.gateReason}>
+              {verdict.unscored.length > 0
+                ? `${verdict.unscored.length} of 10 criteria are unscored.`
+                : verdict.hardStop.length > 0
+                  ? "Accuracy or evidence is below 3 — a hard stop."
+                  : `Editorial score ${verdict.total} / 50, below the 35 threshold.`}
+            </p>
+          )}
+          {flags.map((f, i) => (
+            <p key={`${f.slide}-${f.detail}-${i}`} className={styles.gateReason}>
+              Slide {String(f.slide + 1).padStart(2, "0")} · {f.field} — {f.detail}
+            </p>
+          ))}
+          <Checkbox
+            label="Export anyway — I own this decision."
+            checked={override}
+            onChange={(e) => setOverride(e.target.checked)}
+          />
+        </div>
+      ) : (
+        <p className={styles.gateClear}>Clears the gate.</p>
+      )}
+
       <div
         style={{
           display: "grid",

@@ -8,6 +8,9 @@ import { CarouselSlide } from "@/design-system/components/social/CarouselSlide";
 import type { CarouselSlideKind } from "@/design-system/components/social/CarouselSlide";
 import { StatCard } from "@/design-system/components/social/StatCard";
 import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
+import { ComparisonCard } from "@/design-system/components/social/ComparisonCard";
+import { RankCard } from "@/design-system/components/social/RankCard";
+import { TimelineCard } from "@/design-system/components/social/TimelineCard";
 import type { EditorDoc, Slide } from "@/content/templates";
 import styles from "./editor.module.css";
 
@@ -74,19 +77,81 @@ export function SlideArt({ doc, slide, index, width }: SlideArtProps) {
     );
   }
 
+  if (slide.kind === "compare") {
+    const [a, b] = slide.options ?? [];
+    return (
+      <ComparisonCard
+        {...common}
+        canvas={canvas === "thumb" ? "portrait" : canvas}
+        theme={slide.theme}
+        eyebrow={slide.eyebrow}
+        title={slide.title}
+        unit={slide.unit}
+        source={slide.source}
+        a={{ label: a?.title ?? "A", value: Number(a?.value ?? 0) }}
+        b={{ label: b?.title ?? "B", value: Number(b?.value ?? 0) }}
+      />
+    );
+  }
+
+  if (slide.kind === "rank") {
+    return (
+      <RankCard
+        {...common}
+        canvas={canvas === "thumb" ? "portrait" : canvas}
+        theme={slide.theme}
+        eyebrow={slide.eyebrow}
+        title={slide.title}
+        source={slide.source}
+        rows={(slide.options ?? []).map((o) => ({ label: o.title, value: o.value }))}
+      />
+    );
+  }
+
+  if (slide.kind === "timeline") {
+    return (
+      <TimelineCard
+        {...common}
+        canvas={canvas === "thumb" ? "landscape" : canvas}
+        theme={slide.theme}
+        eyebrow={slide.eyebrow}
+        title={slide.title}
+        source={slide.source}
+        events={slide.events ?? []}
+      />
+    );
+  }
+
+  /*
+   * Every remaining kind is a carousel slide.
+   *
+   * The `never` binding is load-bearing: the branches above are `if`s with this
+   * unconditional fallback, so adding a member to `SlideKind` without a branch
+   * would silently render the wrong card. This makes `tsc` fail at the exact
+   * place the bug would occur.
+   */
+  const remaining: Exclude<Slide["kind"], "stat" | "thumb" | "compare" | "rank" | "timeline"> =
+    slide.kind;
+
   return (
     <CarouselSlide
       {...common}
       canvas={canvas}
-      kind={slide.kind as CarouselSlideKind}
+      kind={remaining as CarouselSlideKind}
       theme={slide.theme}
       index={index}
       total={doc.slides.length}
       eyebrow={slide.eyebrow}
       title={slide.title}
       body={slide.body}
-      items={(slide.items || []).filter(Boolean)}
+      /* `options` carries labelled rows (comparison); `items` carries plain
+         lines (framework). Both reach CarouselSlide, which accepts either. */
+      items={slide.options ?? (slide.items || []).filter(Boolean)}
       principle={slide.principle}
+      /* Both of these were declared, edited and gated, but never passed —
+         source copy on a content slide was invisible on the canvas. */
+      source={slide.source}
+      cta={slide.cta}
     />
   );
 }

@@ -6,8 +6,23 @@ import { Field } from "@/design-system/components/forms/Field";
 import { Input } from "@/design-system/components/forms/Input";
 import { Select } from "@/design-system/components/forms/Select";
 import { Switch } from "@/design-system/components/forms/Switch";
+import { Checkbox } from "@/design-system/components/forms/Checkbox";
 import { CONTENT_TYPES, SERIES, THEMES } from "@/content/templates";
 import type { EditorDoc, Slide } from "@/content/templates";
+import {
+  CRITERIA,
+  DATA_KINDS,
+  FLOOR,
+  ILLUSTRATIVE,
+  MAX_TOTAL,
+  SCORES,
+  THRESHOLD,
+  scanText,
+  verdictFor,
+  type CriterionId,
+  type Score,
+  type TextField,
+} from "@/lib/quality";
 import styles from "./editor.module.css";
 
 const LABEL: CSSProperties = {
@@ -30,6 +45,10 @@ const SECTION_RULED: CSSProperties = {
 };
 
 export interface InspectorProps {
+  /** Jump to a slide from a language flag. */
+  setActive?: (i: number) => void;
+  /** Record one criterion. Functional, so rapid clicks do not overwrite each other. */
+  onScore?: (id: CriterionId, value: Score) => void;
   doc: EditorDoc;
   slide: Slide;
   set: (patch: Partial<EditorDoc>) => void;
@@ -37,7 +56,7 @@ export interface InspectorProps {
 }
 
 /** Right rail: piece metadata, the active slide's copy, canvas, quality gate. */
-export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
+export function Inspector({ doc, slide, set, setSlide, setActive, onScore }: InspectorProps) {
   const chars = (slide.title || "").length;
 
   return (
@@ -117,7 +136,9 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
               multiline
               rows={5}
               value={slide.items.join("\n")}
-              onChange={(e) => setSlide({ items: e.target.value.split("\n") })}
+              onChange={(e) =>
+                setSlide({ items: e.target.value.split("\n").slice(0, 5) })
+              }
             />
           </Field>
         )}
@@ -141,19 +162,142 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
             </Field>
           </div>
         )}
-        {(slide.kind === "stat" || doc.contentType === "Numbers") && (
+        {/* Labelled rows. Same labels the carousel already uses, so the two
+            tools speak the same language. */}
+        {(slide.kind === "comparison" || slide.kind === "compare") && (
+          <>
+            {[0, 1].map((i) => (
+              <div key={i} className={styles.pair}>
+                <Field
+                  label={`Option ${String.fromCharCode(65 + i)}`}
+                  htmlFor={`opt-${i}`}
+                >
+                  <Input
+                    id={`opt-${i}`}
+                    size="sm"
+                    value={slide.options?.[i]?.title ?? ""}
+                    onChange={(e) => {
+                      const next = [...(slide.options ?? [])];
+                      next[i] = { ...(next[i] ?? { title: "" }), title: e.target.value };
+                      setSlide({ options: next });
+                    }}
+                  />
+                </Field>
+                <Field
+                  label={slide.kind === "compare" ? "Its value" : "Its verdict"}
+                  htmlFor={`optb-${i}`}
+                >
+                  <Input
+                    id={`optb-${i}`}
+                    size="sm"
+                    value={
+                      slide.kind === "compare"
+                        ? (slide.options?.[i]?.value ?? "")
+                        : (slide.options?.[i]?.body ?? "")
+                    }
+                    onChange={(e) => {
+                      const next = [...(slide.options ?? [])];
+                      const row = next[i] ?? { title: "" };
+                      next[i] =
+                        slide.kind === "compare"
+                          ? { ...row, value: e.target.value }
+                          : { ...row, body: e.target.value };
+                      setSlide({ options: next });
+                    }}
+                  />
+                </Field>
+              </div>
+            ))}
+          </>
+        )}
+
+        {slide.kind === "rank" && (
           <Field
-            label="Source"
-            hint="Required. Say so if illustrative."
-            htmlFor="sc"
+            label="Rows"
+            hint="One per line, label | value. Eight maximum."
+            htmlFor="rk"
           >
             <Input
-              id="sc"
-              size="sm"
-              value={slide.source || ""}
-              onChange={(e) => setSlide({ source: e.target.value })}
+              id="rk"
+              multiline
+              rows={5}
+              value={(slide.options ?? [])
+                .map((o) => (o.value ? `${o.title} | ${o.value}` : o.title))
+                .join("\n")}
+              onChange={(e) =>
+                setSlide({
+                  options: e.target.value
+                    .split("\n")
+                    .slice(0, 8)
+                    .map((line) => {
+                      const [title, value] = line.split("|");
+                      return {
+                        title: (title ?? "").trim(),
+                        value: value?.trim() || undefined,
+                      };
+                    }),
+                })
+              }
             />
           </Field>
+        )}
+
+        {slide.kind === "timeline" && (
+          <Field
+            label="Events"
+            hint="One per line, date | label. Six maximum."
+            htmlFor="tl"
+          >
+            <Input
+              id="tl"
+              multiline
+              rows={5}
+              value={(slide.events ?? []).map((ev) => `${ev.date} | ${ev.label}`).join("\n")}
+              onChange={(e) =>
+                setSlide({
+                  events: e.target.value
+                    .split("\n")
+                    .slice(0, 6)
+                    .map((line) => {
+                      const [date, label] = line.split("|");
+                      return { date: (date ?? "").trim(), label: (label ?? "").trim() };
+                    }),
+                })
+              }
+            />
+          </Field>
+        )}
+
+        {needsSource(slide, doc.contentType) && (
+          <>
+            <Field
+              label="Source"
+              hint="Required. A data asset does not export without one."
+              htmlFor="sc"
+            >
+              <Input
+                id="sc"
+                size="sm"
+                value={slide.source || ""}
+                onChange={(e) => setSlide({ source: e.target.value })}
+              />
+            </Field>
+            {/* The playbook's exact wording for an unmeasured figure. */}
+            <Checkbox
+              label="This number is illustrative"
+              checked={slide.source === ILLUSTRATIVE}
+              onChange={(e) =>
+                setSlide({
+                  source: e.target.checked
+                    ? ILLUSTRATIVE
+                    : // Only clear what we put there — never clobber a real source.
+                      slide.source === ILLUSTRATIVE
+                      ? ""
+                      : slide.source,
+                })
+              }
+            />
+          </>
         )}
         <Field label="Principle" hint="Optional closing line." htmlFor="pr">
           <Input
@@ -204,7 +348,7 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
         </div>
         <Field
           label="Image"
-          hint="Drop a photograph — right third on thumbnails."
+          hint="Not wired up. Photography is placed in the thumbnail template."
           htmlFor="im"
         >
           <div
@@ -231,8 +375,21 @@ export function Inspector({ doc, slide, set, setSlide }: InspectorProps) {
       </div>
 
       <div style={SECTION_RULED}>
-        <span style={LABEL}>Quality gate</span>
+        {/* The four automatic checks. Their rendered strings — including
+            "Publishing threshold" and "N / 4" — are asserted verbatim by
+            scripts/verify-interactions.mjs. Do not reword them. */}
+        <span style={LABEL}>Automatic checks</span>
         <QualityGate doc={doc} slide={slide} />
+      </div>
+
+      <div style={SECTION_RULED}>
+        <span style={LABEL}>Editorial score</span>
+        <EditorialScore doc={doc} onScore={onScore ?? (() => {})} />
+      </div>
+
+      <div style={SECTION_RULED}>
+        <span style={LABEL}>Language</span>
+        <LanguageFlags doc={doc} setActive={setActive ?? (() => {})} />
       </div>
     </aside>
   );
@@ -299,3 +456,148 @@ function QualityGate({ doc, slide }: { doc: EditorDoc; slide: Slide }) {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------------ */
+/* The editorial score.                                                      */
+/*                                                                           */
+/* `voice-and-writing`: score 0-5 on ten criteria; publish at 35/50 with     */
+/* nothing below 3; accuracy or evidence below 3 is a hard stop whatever the */
+/* total. Below threshold "it becomes research, not a post."                 */
+/* ------------------------------------------------------------------------ */
+
+function ScoreRow({
+  id,
+  label,
+  value,
+  onPick,
+}: {
+  id: CriterionId;
+  label: string;
+  value: Score | undefined;
+  onPick: (score: Score) => void;
+}) {
+  return (
+    <div className={styles.scoreRow}>
+      <span className={styles.scoreLabel}>{label}</span>
+      <div className={styles.scoreScale} role="group" aria-label={label}>
+        {SCORES.map((n) => (
+          <button
+            key={n}
+            type="button"
+            aria-pressed={value === n}
+            aria-label={`${label}: ${n}`}
+            className={`${styles.scoreDot} ${value === n ? styles.scoreDotOn : ""}`}
+            onClick={() => onPick(n)}
+          >
+            {n}
+          </button>
+        ))}
+        <span className={styles.scoreValue}>{value === undefined ? "—" : value}</span>
+      </div>
+      <input type="hidden" name={id} value={value ?? ""} readOnly />
+    </div>
+  );
+}
+
+export function EditorialScore({
+  doc,
+  onScore,
+}: {
+  doc: EditorDoc;
+  /**
+   * Functional on purpose. A patch built from the render-scope `score` would
+   * lose every earlier click in the same tick, because ten clicks before a
+   * re-render all compute from the same stale base.
+   */
+  onScore: (id: CriterionId, value: Score) => void;
+}) {
+  const score = doc.score ?? {};
+  const v = verdictFor(score);
+
+  return (
+    <div className={styles.scoreBlock}>
+      {CRITERIA.map((c) => (
+        <ScoreRow
+          key={c.id}
+          id={c.id}
+          label={c.label}
+          value={score[c.id]}
+          onPick={(n) => onScore(c.id, n)}
+        />
+      ))}
+
+      <div className={`${styles.scoreTotal} ${v.meetsThreshold ? styles.scoreTotalClear : ""}`}>
+        <span>Publishing score</span>
+        <span>
+          {v.total} / {MAX_TOTAL}
+        </span>
+      </div>
+
+      {v.unscored.length > 0 && (
+        <p className={styles.scoreNote}>
+          {v.unscored.length} of {CRITERIA.length} criteria are unscored. A piece nobody scored is a
+          piece nobody owns.
+        </p>
+      )}
+      {v.hardStop.length > 0 && (
+        <p className={styles.scoreNote}>
+          {v.hardStop.map((id) => CRITERIA.find((c) => c.id === id)?.label).join(" and ")} below{" "}
+          {FLOOR} is a hard stop, whatever the total.
+        </p>
+      )}
+      {v.unscored.length === 0 && !v.meetsThreshold && v.total < THRESHOLD && (
+        <p className={styles.scoreNote}>Below threshold — this is research, not a post.</p>
+      )}
+    </div>
+  );
+}
+
+/** Every text field of every slide, flattened for the language scan. */
+export function deckFields(doc: EditorDoc): TextField[] {
+  const out: TextField[] = [];
+  doc.slides.forEach((slide, i) => {
+    (["eyebrow", "title", "body", "principle", "cta"] as const).forEach((field) => {
+      const text = slide[field];
+      if (typeof text === "string" && text) out.push({ slide: i, field, text });
+    });
+  });
+  return out;
+}
+
+export function LanguageFlags({
+  doc,
+  setActive,
+}: {
+  doc: EditorDoc;
+  setActive: (i: number) => void;
+}) {
+  const flags = scanText(deckFields(doc));
+  if (flags.length === 0) {
+    return <p className={styles.scoreNote}>Nothing flagged.</p>;
+  }
+  return (
+    <div className={styles.flagList}>
+      {flags.map((f, i) => (
+        <button
+          key={`${f.slide}-${f.field}-${f.detail}-${i}`}
+          type="button"
+          className={styles.flagRow}
+          onClick={() => setActive(f.slide)}
+        >
+          <span className={styles.flagWhere}>
+            SLIDE {String(f.slide + 1).padStart(2, "0")} · {f.field.toUpperCase()}
+          </span>
+          <span className={styles.flagWhat}>{f.detail}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** True when this slide publishes a figure and therefore owes a source line. */
+export function needsSource(slide: Slide, contentType: string): boolean {
+  return (
+    (DATA_KINDS as readonly string[]).includes(slide.kind) || contentType === "Numbers"
+  );
+}
+

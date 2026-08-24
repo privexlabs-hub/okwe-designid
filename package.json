@@ -14,7 +14,7 @@
     "assets:logo": "node scripts/build-logo-assets.mjs",
     "assets:fontcss": "node scripts/build-font-css.mjs",
     "prebuild": "node scripts/verify-fonts.mjs",
-    "verify": "node scripts/verify-app.mjs && node scripts/verify-interactions.mjs && node scripts/verify-export.mjs",
+    "verify": "node scripts/verify-app.mjs && node scripts/verify-interactions.mjs && node scripts/verify-export.mjs && node scripts/verify-additions.mjs",
     "shots": "node scripts/shoot.mjs",
     "audit": "node scripts/audit-responsive.mjs"
   },

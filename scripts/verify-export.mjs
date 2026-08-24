@@ -84,14 +84,17 @@ async function waitForStatusIdle(timeoutMs = 120000) {
   return "TIMEOUT: " + last;
 }
 
+/** Chrome sometimes writes its own downloads.html shelf page here. Ignore it. */
+const ours = (files) => files.filter((f) => f !== "downloads.html");
+
 const settled = async () => {
   // downloads land as .crdownload first
   for (let i = 0; i < 60; i++) {
-    const files = await readdir(dl);
+    const files = ours(await readdir(dl));
     if (files.length && !files.some((f) => f.endsWith(".crdownload"))) return files;
     await sleep(500);
   }
-  return readdir(dl);
+  return ours(await readdir(dl));
 };
 
 try {
@@ -160,7 +163,7 @@ try {
 
     let files = [];
     for (let i = 0; i < 80; i++) {
-      files = await readdir(dl);
+      files = ours(await readdir(dl));
       if (files.length && !files.some((f) => f.endsWith(".crdownload"))) break;
       await sleep(500);
     }
