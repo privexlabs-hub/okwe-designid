@@ -16,7 +16,7 @@ const OUT = "/private/tmp/claude-501/-Users-mac-Downloads-start-building-okwe-ok
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9337;
 
-const ROUTES = ["/", "/playbook/", "/post-editor/", "/social-kit/", "/content-proofs/", "/carousel/", "/design-system/", "/register/"];
+const ROUTES = ["/", "/playbook/", "/post-editor/", "/social-kit/", "/content-proofs/", "/carousel/", "/design-system/", "/register/", "/brand/"];
 const WIDTHS = [
   { w: 320, h: 720, name: "320-small-phone" },
   { w: 390, h: 844, name: "390-phone" },

@@ -9,7 +9,7 @@
  * never touched. Same house style: plain Node driving Chrome over raw CDP.
  */
 import { spawn } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -18,6 +18,7 @@ const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9350;
 
 const profile = await mkdtemp(path.join(tmpdir(), "okwe-add-"));
+const DL = await mkdtemp(path.join(tmpdir(), "okwe-add-dl-"));
 const chrome = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`,
   `--user-data-dir=${profile}`, "--no-first-run", "--no-default-browser-check",
   "--window-size=1440,900", "--hide-scrollbars", "about:blank"], { stdio: "ignore" });
@@ -44,6 +45,26 @@ const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" 
 const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
 await cdp.send("Page.enable", {}, sessionId);
 await cdp.send("Runtime.enable", {}, sessionId);
+await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: DL });
+
+/** Chrome sometimes drops its own downloads.html shelf page in. Ignore it. */
+const ours = (files) => files.filter((f) => f !== "downloads.html");
+
+const rmDownloads = async () => {
+  await rm(DL, { recursive: true, force: true });
+  await mkdir(DL, { recursive: true });
+  await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: DL });
+};
+
+/** Downloads land as .crdownload first. */
+const settledDownloads = async () => {
+  for (let i = 0; i < 60; i++) {
+    const files = ours(await readdir(DL));
+    if (files.length && !files.some((f) => f.endsWith(".crdownload"))) return files;
+    await sleep(500);
+  }
+  return ours(await readdir(DL));
+};
 
 const ev = async (expression) => {
   const r = await cdp.send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true }, sessionId);
@@ -240,11 +261,119 @@ try {
     "the seed flag is cleared so a reload does not re-seed",
   );
 
+  /* ---- 6 · the brand assets page --------------------------------------- */
+  await go("/brand/");
+
+  const brandNames = await ev(`(() => {
+    const want = ["Okwe", "Okwe Knowledge", "Okwe Comms", "Okwe Move"];
+    const found = [...document.querySelectorAll("h2")].map(h => h.textContent.trim());
+    return want.filter(w => found.includes(w));
+  })()`);
+  check(
+    Array.isArray(brandNames) && brandNames.length === 4,
+    `all four arms are named (${(brandNames || []).join(", ")})`,
+  );
+
+  /*
+   * The lockup specimens must be live components, never <img src=".svg">.
+   * Each master embeds the Archivo subset and weighs ~121 KB, so loading the
+   * twenty of them would cost 2.4 MB for nothing — and the raster would no
+   * longer be rendered from the node the user is looking at.
+   *
+   * Small static previews (the 528 B watermarks, the icon PNGs, the OG card)
+   * ARE images on purpose: they show the actual file being handed over. They
+   * must be lazy.
+   */
+  const weight = await ev(`(async () => {
+    const m = await (await fetch("/assets/logo/logo.manifest.json")).json();
+    const masters = new Set(m.brands.flatMap(b => b.lockups.map(l => l.file)));
+    const imgs = [...document.querySelectorAll('img[src*="/assets/logo/"]')];
+    return {
+      masters: imgs.map(i => i.getAttribute("src").split("/").pop()).filter(f => masters.has(f)),
+      notLazy: imgs.filter(i => i.loading !== "lazy")
+                   .map(i => i.getAttribute("src").split("/").pop()),
+      total: imgs.length,
+    };
+  })()`);
+  check(
+    weight?.masters?.length === 0,
+    `no 121 KB lockup master is loaded as an image (${(weight?.masters || []).join(", ") || "none"})`,
+  );
+  check(
+    weight?.notLazy?.length === 0,
+    `all ${weight?.total} static previews are lazy (${(weight?.notLazy || []).join(", ") || "none eager"})`,
+  );
+
+  /* Every file the manifest names must actually be served. */
+  const missing = await ev(`(async () => {
+    const m = await (await fetch("/assets/logo/logo.manifest.json")).json();
+    const files = [
+      ...m.brands.flatMap(b => [...b.lockups.map(l => l.file), ...b.icons.map(i => i.file)]),
+      ...m.shared.map(s => s.file),
+    ];
+    const bad = [];
+    for (const f of files) {
+      const r = await fetch("/assets/logo/" + f, { method: "HEAD" });
+      if (!r.ok) bad.push(f + " -> " + r.status);
+    }
+    return { count: files.length, bad };
+  })()`);
+  check(missing?.bad?.length === 0, `all ${missing?.count} manifest files serve (${(missing?.bad || []).join(", ") || "none missing"})`);
+
+  /* A vector master download must carry its type, or the 125% expansion is lost. */
+  await rmDownloads();
+  const svgClicked = await ev(`(() => {
+    const sel = [...document.querySelectorAll("select")][0];
+    if (!sel) return "no control";
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+    setter.call(sel, sel.options[0].value);
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+    const btn = sel.closest("*").querySelector("button") ||
+                sel.parentElement.querySelector("button");
+    if (!btn) return "no button";
+    btn.click();
+    return "clicked";
+  })()`);
+  if (svgClicked !== "clicked") {
+    check(false, `SVG master: ${svgClicked}`);
+  } else {
+    const files = await settledDownloads();
+    const svg = files.find((f) => f.endsWith(".svg"));
+    check(!!svg, `the vector master downloads (${files.join(", ") || "nothing"})`);
+    if (svg) {
+      const text = await readFile(path.join(DL, svg), "utf8");
+      check(text.trimStart().startsWith("<svg"), "it is real SVG markup");
+      check(text.includes("@font-face"), "it carries its type, so the 125% expansion travels");
+    }
+  }
+
   await cdp.send("Target.closeTarget", { targetId });
 } finally {
   chrome.kill();
   await sleep(500);
   await rm(profile, { recursive: true, force: true }).catch(() => {});
+  await rm(DL, { recursive: true, force: true }).catch(() => {});
+}
+
+/*
+ * The generator duplicates ARM_WORD because it is .mjs and cannot import TS.
+ * It throws on drift at build time; this asserts the same thing about the
+ * shipped manifest, so a stale manifest cannot survive a green run.
+ */
+{
+  const geom = await readFile("src/design-system/brand/geometry.ts", "utf8");
+  const block = geom.match(/ARM_WORD[^{]*\{([^}]*)\}/)?.[1] ?? "";
+  const armsInCode = [...block.matchAll(/(\w+)\s*:/g)].map((m) => m[1]).sort();
+  const manifest = JSON.parse(await readFile("public/assets/logo/logo.manifest.json", "utf8"));
+  const armsInManifest = manifest.brands.map((b) => b.arm).filter(Boolean).sort();
+  check(
+    armsInCode.join(",") === armsInManifest.join(","),
+    `manifest arms match geometry.ts (${armsInCode.join(", ")} vs ${armsInManifest.join(", ")})`,
+  );
+  check(
+    manifest.brands.length === 4 && manifest.brands.filter((b) => b.arm === null).length === 1,
+    `four brands, exactly one parent (${manifest.brands.length} brands)`,
+  );
 }
 
 let bad = 0;

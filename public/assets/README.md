@@ -42,17 +42,56 @@ ratios still match that module, so the two renderers cannot drift apart.
 The mark is the **seed row** — six counters from the okwe board, three sown in
 sulphur, three open — above the name in Archivo at 125% width.
 
+### The four arms
+
+One mark serves the whole ecosystem. The seed row never changes between arms;
+OKWE is always set at 125% width. An **arm** is one qualifier word in muted ink,
+beside the wordmark or beneath it. The parent, Okwe, is the wordmark **alone** —
+the absence of a word is what makes it the parent. Arms are never differentiated
+by colour: verdigris and stamp red already carry meanings, and sulphur never
+carries type. If you cannot tell two arms apart in greyscale, the lockup is
+wrong.
+
+| Brand | Qualifier | Files |
+| --- | --- | --- |
+| Okwe | none — the parent | `okwe-*` |
+| Okwe Knowledge | `Knowledge` | `okwe-knowledge-*` |
+| Okwe Comms | `Comms` | `okwe-comms-*` |
+| Okwe Move | `Move` | `okwe-move-*` |
+
+The qualifier words live in `ARM_WORD` in `geometry.ts`; the generator keeps its
+own copy and **throws** if the two disagree, exactly as it does for the ratios.
+
+Each of the four gets the same seven files, under its own prefix:
+
 | File | What it is |
 | --- | --- |
-| `okwe-stacked.svg` | The primary lockup: seeds above, name under. |
-| `okwe-stacked-inverse.svg` | The same on the cyanotype plate. |
-| `okwe-horizontal.svg` | Seeds beside the name. |
-| `okwe-wordmark.svg` | The name alone. |
-| `okwe-avatar.svg` | The mark on an ink square, for profile pictures. |
-| `favicon.svg` | The seed row alone — at 16px the wordmark is unreadable, and the counters are the part that survives. Pure geometry, so it needs no font. |
-| `apple-touch-icon.png` | 180×180, rasterised from the avatar. |
-| `icon-512.png` | 512×512. |
+| `<prefix>stacked.svg` | The primary lockup: seeds above, name under. |
+| `<prefix>stacked-inverse.svg` | The same on the cyanotype plate. |
+| `<prefix>horizontal.svg` | Seeds beside the name. |
+| `<prefix>wordmark.svg` | The name alone. |
+| `<prefix>avatar.svg` | The mark on an ink square, for profile pictures. |
+| `<prefix>apple-touch-icon.png` | 180×180, rasterised from the avatar. |
+| `<prefix>icon-512.png` | 512×512, the same. |
+
+`logo.manifest.json` records every one of them — brand, variant, tone, real
+artboard size and byte length — plus the arm rule as one paragraph. The kit page
+imports it, so its keys are a contract; do not edit it by hand.
+
+### Shared across the ecosystem
+
+| File | What it is |
+| --- | --- |
+| `favicon.svg` | The seed row alone — at 16px the wordmark is unreadable, and the counters are the part that survives. Pure geometry, so it needs no font, and no arm could be read at that size, so all four share it. |
+| `watermark-chalk.svg` | The seed row flat in `--cyanotype-100`, for chalk grounds. |
+| `watermark-plate.svg` | The same in `--cyanotype-800`, for the ink plate. |
 | `og-default.svg` / `.png` | 1200×630 share card, built as the register sheet rather than a centred logo. |
+
+The watermarks carry **no `opacity` and no alpha**: the tint is a real token
+step, so the counters composite identically over any ground and the system stays
+flat colour. They carry **no sulphur** either — the sown counters take the same
+tint as the open ones, because sulphur never sits behind text and a watermark is
+by definition behind text. Under 600 bytes each, and no font embed.
 
 The lockup SVGs embed the Archivo latin subset as a base64 `@font-face`. Without
 it the wordmark falls back to Helvetica wherever the file is opened and the

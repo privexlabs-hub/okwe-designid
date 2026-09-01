@@ -1,5 +1,5 @@
 /**
- * The seven register entries on the index page.
+ * The eight register entries on the index page.
  * Copy is verbatim from "Okwe Knowledge.dc.html"; only the hrefs are rewritten
  * from Design Canvas file paths to Next routes.
  */
@@ -61,6 +61,13 @@ export const ENTRIES: RegisterEntry[] = [
     meta: "OKW-REG-01 · KEPT IN THIS BROWSER",
     href: "/register",
   },
+  {
+    num: "08",
+    title: "Brand assets",
+    body: "Every mark for the four arms — Okwe, Okwe Knowledge, Okwe Comms and Okwe Move — with the rule that governs them. Stacked, horizontal, wordmark and avatar lockups, app icons and document watermarks, downloadable as vector, raster or one kit.",
+    meta: "OKW-BRAND-01 · FOUR ARMS",
+    href: "/brand",
+  },
 ];
 
 /** Header line and register foot, verbatim from the source document. */
@@ -68,6 +75,6 @@ export const MASTHEAD = {
   callNumber: "OKW·OS/01 · OPERATING SYSTEM · 19 AUG 2026",
   strapline: "TWO PEOPLE · THREE PILLARS · ONE REGISTER",
   headline: "The publishing operating system",
-  lede: "How Okwe looks, how it sounds, what it publishes, how one idea becomes many assets, and how content becomes products. Seven entries. Everything a two-person team needs to publish from day one.",
+  lede: "How Okwe looks, how it sounds, what it publishes, how one idea becomes many assets, and how content becomes products. Eight entries. Everything a two-person team needs to publish from day one.",
   destination: "okweknowledge.com · one idea a week",
 } as const;

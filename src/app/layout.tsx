@@ -13,7 +13,11 @@ export const metadata: Metadata = {
   applicationName: "Okwe Knowledge",
   icons: {
     icon: [{ url: "/assets/logo/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/assets/logo/apple-touch-icon.png", sizes: "180x180" }],
+    // This app is Okwe Knowledge, so it wears the Knowledge touch icon. The
+    // favicon stays the shared seed row — at 16px a qualifier is unreadable.
+    apple: [
+      { url: "/assets/logo/okwe-knowledge-apple-touch-icon.png", sizes: "180x180" },
+    ],
   },
   openGraph: {
     type: "website",

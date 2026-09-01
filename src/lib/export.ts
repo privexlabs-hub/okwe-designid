@@ -251,3 +251,35 @@ export function slugify(s: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 48);
 }
+
+/* ------------------------------------------------------- static assets ---- */
+
+/**
+ * Pull a pre-generated static asset off the origin as a packaged file.
+ *
+ * The brand masters are real vector files built at build time; serving them
+ * directly is the only way to hand over a clean SVG. `toSvgString` cannot do
+ * this — html-to-image wraps the DOM in a `foreignObject`, which is a
+ * screenshot in SVG clothing, not a logo.
+ *
+ * NOTE: the URL is root-relative because `next.config.ts` sets no `basePath`
+ * or `assetPrefix`. If either is ever added, every call here silently 404s —
+ * under `output: "export"` there is no server to redirect it.
+ */
+export async function fetchAsset(url: string, name?: string): Promise<PackagedFile> {
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch {
+    throw new ExportError(`${url} could not be reached.`);
+  }
+  if (!res.ok) throw new ExportError(`${url} — ${res.status} ${res.statusText}`);
+  return { name: name ?? url.slice(url.lastIndexOf("/") + 1), blob: await res.blob() };
+}
+
+/** Fetch a static asset and hand it straight to the user. */
+export async function downloadAsset(url: string, name?: string): Promise<string> {
+  const file = await fetchAsset(url, name);
+  download(file.blob, file.name);
+  return file.name;
+}

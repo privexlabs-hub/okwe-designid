@@ -30,6 +30,7 @@ notation — no runtime, no backend, no third-party requests.
 | `/content-proofs` | `content-proofs/Proofs.jsx` | The twelve proofs, with a working plate-mode switch and a jump index. |
 | `/carousel` | `carousel/SocialCarousel.dc.html` | The six-part set at 1080×1350, editable in place and exportable. |
 | `/register` | `content-playbook` (04) | The question register — *"the most valuable file in the company"*. Five documented fields, priority = frequency × cost of getting it wrong, promote-a-question-into-a-draft. |
+| `/brand` | derived from the design system's own rules | Every mark for the four arms — Okwe, Okwe Knowledge, Okwe Comms, Okwe Move — with the rule that governs them. SVG masters, PNG at 1×/2×/3×, PDF, app icons, watermarks, and a kit ZIP. |
 | `/design-system` | `_ds/…/_ds_bundle.js` | Every component on one specimen sheet, so consistency is checked rather than assumed. Includes the five colour ramps (hex read back from the live custom properties), the type scale, a width-contrast specimen, and a plate-mode block. |
 
 ## How it is built
@@ -133,8 +134,8 @@ Everything runs against the **production static export**, not the dev server.
 ```bash
 npm run build
 npx serve out -l 4321
-npm run verify        # 99 checks across four suites
-npm run audit         # 48 viewport x route combinations
+npm run verify        # 111 checks across four suites
+npm run audit         # 54 viewport x route combinations
 ```
 
 - `scripts/verify-app.mjs` — every route renders, no console errors, **zero
@@ -204,6 +205,46 @@ exist.
 Three new data cards complete the `DAT` domain, each composed on `PostCanvas` like `StatCard`:
 `ComparisonCard` (two tallies, ink versus sulphur), `RankCard` (numbered rows, capped at eight) and
 `TimelineCard` (one hairline, square-ended ticks, capped at six). No arrows, no curves, no dots.
+
+## The four arms
+
+The ecosystem has four marks: **Okwe** (the parent), **Okwe Knowledge**, **Okwe Comms** and
+**Okwe Move**. The source documents none of this — it names only "Okwe Knowledge" and mentions the
+triad *"Knowledge → Commerce → Movement"* exactly once, inside a *rejected* visual territory. So the
+arm system is **derived from rules the design system does state**, not invented:
+
+> One mark serves the whole ecosystem. The seed row never changes: six counters, three sown, three
+> open. OKWE is always Archivo at 125% width. An arm is one qualifier word in muted ink; the parent
+> is the wordmark alone. **Arms are never differentiated by colour.**
+
+No arm colour, because nothing is left unclaimed: verdigris is bound to `--class-interpretation`,
+`--status-success` and `--data-3`; stamp red to `--class-opinion` and `--status-danger`; sulphur
+never carries type. An arm coloured verdigris would read as "interpretation" wherever the two met.
+The arms are told apart by the word, as the call number tells content apart.
+
+`Logo` gained one prop, `arm?: LogoArm` — a closed union, not free text. It takes precedence over
+`knowledge`, which still works, so all fourteen existing call sites render unchanged. The `avatar`
+variant reads `arm` **only**: `knowledge` defaults to `true`, so reading the resolved qualifier
+there would make every existing `<Logo variant="avatar"/>` sprout a second line.
+
+### The assets
+
+`npm run assets:logo` emits **34 files (~2.7 MB)** into `public/assets/logo/` plus
+`logo.manifest.json`, which `/brand` imports at build time — so the page can never list a file that
+was not written. 20 vector masters (4 arms × stacked, stacked-inverse, horizontal, wordmark,
+avatar), 8 app icons, a shared favicon, two watermarks and the OG pair.
+
+**The favicon is shared.** At 16px a qualifier is unreadable, and an unreadable word is noise; the
+180 and 512 icons have room to name their arm, so they do.
+
+**The watermark** is the seed row alone in a real tint step (`--cyanotype-100` on chalk,
+`--cyanotype-800` on the plate) — no opacity and no alpha, so it composites flat over any ground,
+and no sulphur, because sulphur never sits behind text.
+
+Rasters are **not** pre-generated. PNG at 1×/2×/3× and PDF are rendered in the browser from the live
+`<Logo>` you are looking at, via the export library that already existed. Pre-generating them would
+be 100 files and 5.3 MB instead of 34 and 2.7 MB. The SVG download serves the **master file** rather
+than `toSvgString`, which wraps the DOM in a `foreignObject` — a screenshot in SVG clothing.
 
 ## Known limits
 

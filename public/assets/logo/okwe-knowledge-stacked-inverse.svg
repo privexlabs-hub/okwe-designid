@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="127" height="85" viewBox="0 0 127 85" role="img" aria-label="Okwe">
+<svg xmlns="http://www.w3.org/2000/svg" width="299" height="156" viewBox="0 0 299 156" role="img" aria-label="Okwe Knowledge">
   <style>
     @font-face{
       font-family:"Archivo";
@@ -9,13 +9,15 @@
     }
     .word{font-family:"Archivo",Helvetica,sans-serif;font-weight:700;font-stretch:125%;letter-spacing:-0.02em;text-transform:uppercase}
   </style>
-  <g>
+  <rect width="299" height="156" fill="#05161F"/>
+  <g transform="translate(16,16)">
     <circle cx="6.720000000000001" cy="6.720000000000001" r="6.720000000000001" fill="#E3CB2A"/>
     <circle cx="27.160000000000004" cy="6.720000000000001" r="6.720000000000001" fill="#E3CB2A"/>
     <circle cx="47.6" cy="6.720000000000001" r="6.720000000000001" fill="#E3CB2A"/>
-    <circle cx="68.04" cy="6.720000000000001" r="5.720000000000001" fill="none" stroke="#05161F" stroke-width="2"/>
-    <circle cx="88.48" cy="6.720000000000001" r="5.720000000000001" fill="none" stroke="#05161F" stroke-width="2"/>
-    <circle cx="108.92" cy="6.720000000000001" r="5.720000000000001" fill="none" stroke="#05161F" stroke-width="2"/>
-    <text class="word" x="0" y="67.2" font-size="48" fill="#05161F">Okwe</text>
+    <circle cx="68.04" cy="6.720000000000001" r="5.720000000000001" fill="none" stroke="#F1F3F1" stroke-width="2"/>
+    <circle cx="88.48" cy="6.720000000000001" r="5.720000000000001" fill="none" stroke="#F1F3F1" stroke-width="2"/>
+    <circle cx="108.92" cy="6.720000000000001" r="5.720000000000001" fill="none" stroke="#F1F3F1" stroke-width="2"/>
+    <text class="word" x="0" y="67.2" font-size="48" fill="#F1F3F1">Okwe</text>
+    <text class="word" x="0" y="114.2" font-size="48" fill="#86B6C7">Knowledge</text>
   </g>
 </svg>

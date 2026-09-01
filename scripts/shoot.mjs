@@ -8,7 +8,7 @@ const BASE = process.argv[2] ?? "http://localhost:4321";
 const OUT = process.argv[3] ?? "/private/tmp/claude-501/-Users-mac-Downloads-start-building-okwe-okwe-knows/65a404e3-a918-45d8-9c79-1a36bae3b71e/scratchpad/shots";
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9334;
-const ROUTES = { index:"/", playbook:"/playbook/", editor:"/post-editor/", social:"/social-kit/", proofs:"/content-proofs/", carousel:"/carousel/", ds:"/design-system/", register:"/register/" };
+const ROUTES = { index:"/", playbook:"/playbook/", editor:"/post-editor/", social:"/social-kit/", proofs:"/content-proofs/", carousel:"/carousel/", ds:"/design-system/", register:"/register/", brand:"/brand/" };
 
 const profile = await mkdtemp(path.join(tmpdir(), "okwe-shot-"));
 const chrome = spawn(CHROME, ["--headless=new",`--remote-debugging-port=${PORT}`,`--user-data-dir=${profile}`,"--no-first-run","--no-default-browser-check","--window-size=1440,900","--hide-scrollbars","--force-device-scale-factor=1","about:blank"], { stdio:"ignore" });

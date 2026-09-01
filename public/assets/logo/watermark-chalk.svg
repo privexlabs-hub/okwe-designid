@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="107" height="12" viewBox="0 0 107 12" role="img" aria-label="Okwe">
+  <g>
+    <circle cx="6" cy="6" r="6" fill="#DEEAEF"/>
+    <circle cx="25" cy="6" r="6" fill="#DEEAEF"/>
+    <circle cx="44" cy="6" r="6" fill="#DEEAEF"/>
+    <circle cx="63" cy="6" r="5" fill="none" stroke="#DEEAEF" stroke-width="2"/>
+    <circle cx="82" cy="6" r="5" fill="none" stroke="#DEEAEF" stroke-width="2"/>
+    <circle cx="101" cy="6" r="5" fill="none" stroke="#DEEAEF" stroke-width="2"/>
+  </g>
+</svg>

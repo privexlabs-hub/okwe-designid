@@ -1,0 +1,352 @@
+/* OKW-BRAND-01 — the brand assets ledger.
+   Breakpoint literals mirror the tokens in design-system/tokens/breakpoints.css
+   (custom properties cannot be read inside @media):
+     --bp-lg 1100px · --bp-md 860px · --bp-sm 600px
+   Rules, not boxes: no shadow, no radius, no card border. */
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--space-9) var(--page-margin-fluid) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  border-bottom: var(--rule-thick) solid var(--rule-ink);
+  padding-bottom: var(--space-7);
+}
+
+.back {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow {
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.lede {
+  font: var(--type-lede);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+.mono {
+  font: var(--type-data);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.h2 { font-size: var(--size-2xl); }
+/* --bp-md: 860px */
+@media (max-width: 860px) { .h2 { font-size: clamp(23px, 5.4vw, var(--size-2xl)); } }
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding-top: var(--space-5);
+}
+
+.note {
+  font: var(--type-body);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+  overflow-wrap: anywhere;
+}
+
+/* ---- The rule ------------------------------------------------------------- */
+.rule {
+  font: var(--type-lede);
+  color: var(--text-body);
+  max-width: var(--measure-body);
+  border-left: var(--rule-thick) solid var(--rule-mark);
+  padding-left: var(--space-5);
+  overflow-wrap: anywhere;
+}
+
+.corollaries {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+}
+/* --bp-sm: 600px */
+@media (max-width: 600px) { .corollaries { grid-template-columns: minmax(0, 1fr); } }
+
+.corollary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.corollaryHead {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.corollaryNote {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  max-width: var(--measure-body);
+  overflow-wrap: anywhere;
+}
+
+/* ---- The ledger row -------------------------------------------------------
+   spec = live specimen · name = label · ctrl = format + download · meta = file
+   The annotation margin folds at 1100, the controls drop at 860, one column
+   at 600. */
+.rows { display: flex; flex-direction: column; }
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(200px, max-content) minmax(0, 1fr) 272px 200px;
+  grid-template-areas: "spec name ctrl meta";
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-5) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  align-items: start;
+}
+
+.spec {
+  grid-area: spec;
+  min-width: 0;
+  /* A fixed-width mark is artwork: it scrolls in its own box rather than
+     pushing the page sideways. */
+  overflow-x: auto;
+}
+.specInner {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-4);
+}
+.specInverse,
+.specInverse .specInner { background: var(--surface-ink); }
+
+.name {
+  grid-area: name;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.nameLabel {
+  font: var(--type-body);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+.nameHint {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  grid-area: meta;
+  min-width: 0;
+  font: var(--type-data);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* ---- The controls: one select, one button --------------------------------- */
+.controls {
+  grid-area: ctrl;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.select,
+.button {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  letter-spacing: var(--tracking-call);
+  text-transform: uppercase;
+  border-radius: var(--radius-0);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  cursor: pointer;
+  transition: var(--transition-control);
+  min-width: 0;
+}
+
+.select {
+  appearance: none;
+  border: var(--rule-thin) solid var(--rule-ink);
+  background: var(--surface-field);
+  color: var(--text-primary);
+  flex: 1 1 175px;
+  max-width: 100%;
+}
+
+.button {
+  border: var(--rule-thin) solid var(--rule-ink);
+  background: var(--interactive-bg);
+  color: var(--interactive-fg);
+  font-weight: var(--weight-semibold);
+  flex: 0 0 auto;
+}
+.button:hover:not(:disabled) { background: var(--interactive-bg-hover); }
+.button:disabled {
+  background: var(--interactive-disabled-bg);
+  color: var(--interactive-disabled-fg);
+  border-color: var(--rule-quiet);
+  cursor: default;
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-3xs);
+  letter-spacing: var(--tracking-call);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+  flex: 1 1 100%;
+}
+.error { color: var(--status-danger); }
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* On a coarse pointer the 26px control is under the tap minimum. */
+@media (pointer: coarse) {
+  .select,
+  .button { height: var(--tap-min); }
+}
+
+/* ---- The kit / brand ZIP buttons ------------------------------------------ */
+.zip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.zipButton {
+  font-family: var(--font-mono);
+  font-stretch: var(--stretch-mono);
+  font-size: var(--size-2xs);
+  letter-spacing: var(--tracking-call);
+  text-transform: uppercase;
+  border-radius: var(--radius-0);
+  height: var(--control-height-md);
+  padding: 0 var(--space-5);
+  border: var(--rule-thin) solid var(--rule-ink);
+  background: var(--interactive-mark-bg);
+  color: var(--interactive-mark-fg);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: var(--transition-control);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.zipButton:hover:not(:disabled) { background: var(--interactive-mark-bg-hover); }
+.zipButton:disabled {
+  background: var(--interactive-disabled-bg);
+  color: var(--interactive-disabled-fg);
+  border-color: var(--rule-quiet);
+  cursor: default;
+}
+.zipQuiet {
+  background: var(--interactive-bg);
+  color: var(--interactive-fg);
+}
+.zipQuiet:hover:not(:disabled) { background: var(--interactive-bg-hover); }
+
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+/* ---- Footer --------------------------------------------------------------- */
+.footer {
+  border-top: var(--rule-thin) solid var(--rule-ink);
+  padding-top: var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* --bp-lg: 1100px — the annotation margin folds under the name. */
+@media (max-width: 1100px) {
+  .row {
+    grid-template-columns: minmax(180px, max-content) minmax(0, 1fr) 272px;
+    grid-template-areas:
+      "spec name ctrl"
+      "spec meta ctrl";
+  }
+}
+
+/* --bp-md: 860px — the controls drop beneath the specimen. */
+@media (max-width: 860px) {
+  .row {
+    grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
+    grid-template-areas:
+      "spec name"
+      "spec meta"
+      "ctrl ctrl";
+    gap: var(--space-4) var(--space-5);
+  }
+}
+
+/* --bp-sm: 600px — one column. An inverse specimen keeps its ink ground
+   full-bleed to the page margin, so the mark is never a small dark chip. */
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "spec"
+      "name"
+      "meta"
+      "ctrl";
+    gap: var(--space-4);
+  }
+  .specInverse {
+    margin-left: calc(-1 * var(--page-margin-fluid));
+    margin-right: calc(-1 * var(--page-margin-fluid));
+    padding-left: var(--page-margin-fluid);
+    padding-right: var(--page-margin-fluid);
+  }
+  .select { flex: 1 1 100%; }
+}

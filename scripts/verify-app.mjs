@@ -24,7 +24,7 @@ const CHROME =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9333;
 
-const ROUTES = ["/", "/playbook/", "/post-editor/", "/social-kit/", "/content-proofs/", "/carousel/", "/design-system/", "/register/"];
+const ROUTES = ["/", "/playbook/", "/post-editor/", "/social-kit/", "/content-proofs/", "/carousel/", "/design-system/", "/register/", "/brand/"];
 
 const profile = await mkdtemp(path.join(tmpdir(), "okwe-verify-"));
 const chrome = spawn(
