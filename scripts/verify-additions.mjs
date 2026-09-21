@@ -565,6 +565,42 @@ try {
     check(g.sulphur.includes("1.3:1") && g.sulphur.includes("Fail"), `sulphur on chalk is measured and fails for text (${g.sulphur.replace(/\s+/g, " ").slice(0, 60)})`);
     check(g.marks.length === 5, `the five marks are specimened (${g.marks.join(", ")})`);
 
+    /* Every shade can be taken with a click: its hex, its token and both ratios. */
+    const steps = cssColours.filter((n) => /^--(chalk|cyanotype|sulphur|verdigris|stamp)-\d+$/.test(n));
+    const tiles = await ev(`(() => {
+      const all = [...document.querySelectorAll("[data-tile]")];
+      return {
+        count: all.length,
+        complete: all.filter(t =>
+          t.querySelector('[data-copy^="#"]') &&
+          t.querySelector('[data-copy="' + t.getAttribute("data-tile") + '"]') &&
+          t.querySelectorAll('[data-copy$=":1"]').length === 2).length,
+        buttons: document.querySelectorAll("[data-copy]").length,
+      };
+    })()`);
+    check(tiles.count === steps.length && tiles.complete === steps.length,
+      `every shade in the hierarchy copies its hex, token and both contrast ratios (${tiles.complete}/${steps.length})`);
+
+    await cdp.send("Browser.grantPermissions", { origin: BASE, permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"] }).catch(() => {});
+    const clip = (selector) => ev(`(async () => {
+      const b = document.querySelector(${JSON.stringify(selector)});
+      if (!b) return { text: "missing", said: "" };
+      b.click();
+      await new Promise(r => setTimeout(r, 300));
+      const text = await navigator.clipboard.readText().catch(e => "ERR " + e.message);
+      return { text, said: b.textContent };
+    })()`);
+    const expectHex = colourSrc.match(/--cyanotype-600:(#[0-9A-Fa-f]{6})/)?.[1];
+    const hexCopy = await clip('[data-tile="--cyanotype-600"] [data-copy^="#"]');
+    check(hexCopy.text === expectHex && hexCopy.said.includes("Copied"),
+      `clicking a shade copies its hex and says so (${hexCopy.text}, expected ${expectHex})`);
+    const ratioCopy = await clip('[data-tile="--cyanotype-600"] [data-copy$=":1"]');
+    check(/^\d+\.\d:1$/.test(ratioCopy.text), `clicking a contrast copies the ratio (${ratioCopy.text})`);
+    const quoteCopy = await clip('[aria-label="Copy this section as text"]');
+    check(quoteCopy.text.includes("Simple language, sophisticated thinking") && !/<(p|h2|strong)[ >]/.test(quoteCopy.text),
+      `a quoted section copies as clean text (${quoteCopy.text.slice(0, 48).replace(/\n/g, " ")}…)`);
+    check(tiles.buttons > 300, `values across every section are copyable (${tiles.buttons} copy controls)`);
+
     await cdp.send("Emulation.setDeviceMetricsOverride", { width: 320, height: 800, deviceScaleFactor: 2, mobile: true }, sessionId);
     await go("/guidelines/");
     const narrowGuide = await ev(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);

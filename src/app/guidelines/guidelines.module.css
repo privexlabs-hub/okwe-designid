@@ -461,21 +461,46 @@
 }
 
 .roleRow {
-  display: grid;
-  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
-  gap: var(--space-6);
-  padding: var(--space-5) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6) 0;
   border-top: var(--rule-thin) solid var(--rule-quiet);
 }
 
-.roleStrip {
+/* One tile per step: the chip, then everything about it that can be copied. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--space-6) var(--space-4);
+}
+
+.tile {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.tileChip {
+  display: block;
+  align-self: stretch;
   height: 48px;
   border: var(--rule-thin) solid var(--rule-quiet);
 }
 
-.roleStrip span {
-  flex: 1;
+.tileName {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.tileFacts {
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
 }
 
 .roleBody {
@@ -652,6 +677,82 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+/* ---- Copy: every value takes one click. It looks like the value it copies,
+   ruled underneath like a link; the rule turns sulphur on hover, as links do. ---- */
+.copy {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font: inherit;
+  font-stretch: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-bottom: var(--rule-thin) dotted var(--rule-quiet);
+  border-radius: var(--radius-0);
+  padding: 0;
+  text-align: left;
+  cursor: copy;
+  transition: var(--transition-control);
+}
+
+.copy:hover {
+  border-bottom-style: solid;
+  border-bottom-color: var(--rule-mark);
+}
+
+.copy:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.copyText {
+  overflow-wrap: anywhere;
+}
+
+/* The confirmation reads in muted ink, not the success colour: the page's own
+   examples are excluded from its usage measurement, so using success here would
+   make "not yet used" untrue without the page knowing. */
+.copyState {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.copyState:empty {
+  display: none;
+}
+
+.copyBlock,
+.copyInline {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--text-secondary);
+  border-bottom-style: solid;
+}
+
+/* The quote stretches to the column; only the button sits at its natural size.
+   With align-items: flex-start the quote sized to its longest line instead, and
+   pushed the page 307px wide on a phone. */
+.quoteBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.quoteBlock > .copyBlock {
+  align-self: flex-start;
 }
 
 /* ---- Quotes from the playbook ---- */

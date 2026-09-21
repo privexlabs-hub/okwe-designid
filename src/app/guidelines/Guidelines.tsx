@@ -48,8 +48,10 @@ import { playbookSection } from "@/content/playbook";
 import { TEMPLATES } from "@/content/templates";
 import { contrast, grade, isHex, ratioLabel } from "@/lib/contrast";
 import { CRITERIA, FLOOR, HARD_STOP, MAX_TOTAL, THRESHOLD } from "@/lib/quality";
+import { htmlToMarkdown } from "@/lib/markdown";
 import { isAlias, tokenUsage } from "@/lib/tokens";
 import type { Token, TokenSet } from "@/lib/tokens";
+import { CopyValue } from "./CopyValue";
 import s from "./guidelines.module.css";
 
 /* ------------------------------------------------------------- helpers ---- */
@@ -121,9 +123,29 @@ function Grade({ r }: { r: number | null }) {
   );
 }
 
-/** Quote a playbook section in its own rendered form. */
+/** A contrast ratio you can copy, with its WCAG grade beside it. */
+function Ratio({ r }: { r: number | null }) {
+  if (r === null) return <Grade r={r} />;
+  return (
+    <CopyValue value={ratioLabel(r)}>
+      <Grade r={r} />
+    </CopyValue>
+  );
+}
+
+/**
+ * Quote a playbook section in its own rendered form, with a button that copies
+ * it as plain Markdown — the same conversion the context pack uses.
+ */
 function Quote({ html }: { html: string }) {
-  return <div className={`okwe-doc ${s.quote}`} dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div className={s.quoteBlock}>
+      <CopyValue value={htmlToMarkdown(html)} label="this section as text" className={s.copyBlock}>
+        Copy
+      </CopyValue>
+      <div className={`okwe-doc ${s.quote}`} dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
+  );
 }
 
 function markProps(brand: LogoBrand) {
@@ -308,7 +330,14 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
       {/* ---------------------------------------------------------- 02 logo */}
       <Section
         id="logo"
-        lead={<p className={s.rule}>{LOGO_MANIFEST.rule}</p>}
+        lead={
+          <div className={s.quoteBlock}>
+            <CopyValue value={LOGO_MANIFEST.rule} label="the logo rule" className={s.copyBlock}>
+              Copy
+            </CopyValue>
+            <p className={s.rule}>{LOGO_MANIFEST.rule}</p>
+          </div>
+        }
       >
         <Sub title="The five marks">
           <div className={s.marks}>
@@ -400,17 +429,35 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
               const ramp = ramps.find((x) => x.name === r.ramp);
               return (
                 <article key={r.role} className={s.roleRow} data-colour-role={r.ramp}>
-                  <div className={s.roleStrip} aria-hidden="true">
-                    {ramp?.steps.map((st) => (
-                      <span key={st.token} style={{ background: st.hex }} />
-                    ))}
-                  </div>
                   <div className={s.roleBody}>
                     <span className={s.roleName}>
                       {r.role} · <b>{r.ramp}</b>
                     </span>
-                    <p className={s.quoteLine}>&ldquo;{r.quote}&rdquo;</p>
+                    <p className={s.quoteLine}>
+                      &ldquo;{r.quote}&rdquo;{" "}
+                      <CopyValue value={r.quote} label={`the ${r.ramp} quote`} className={s.copyInline}>
+                        Copy
+                      </CopyValue>
+                    </p>
                     <p className={s.prose}>{r.use}</p>
+                  </div>
+                  <div className={s.tiles}>
+                    {ramp?.steps.map((st) => (
+                      <div key={st.token} className={s.tile} data-tile={st.token}>
+                        <span className={s.tileChip} style={{ background: st.hex }} aria-hidden="true" />
+                        <span className={s.tileName}>
+                          {ramp.name}-{st.step}
+                        </span>
+                        <CopyValue value={st.hex} />
+                        <CopyValue value={st.token} className={s.quiet} />
+                        <span className={s.tileFacts}>
+                          chalk <Ratio r={contrast(st.hex, chalk)} />
+                        </span>
+                        <span className={s.tileFacts}>
+                          ink <Ratio r={contrast(st.hex, ink)} />
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </article>
               );
@@ -444,14 +491,16 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                     return (
                       <tr key={st.token} data-token={st.token}>
                         <td className={s.mono}>
-                          <Swatch value={st.hex} /> {ramp.name}-{st.step}
+                          <Swatch value={st.hex} /> <CopyValue value={st.token} />
                         </td>
-                        <td className={s.mono}>{st.hex}</td>
-                        <td>
-                          <Grade r={contrast(st.hex, chalk)} />
+                        <td className={s.mono}>
+                          <CopyValue value={st.hex} />
                         </td>
                         <td>
-                          <Grade r={contrast(st.hex, ink)} />
+                          <Ratio r={contrast(st.hex, chalk)} />
+                        </td>
+                        <td>
+                          <Ratio r={contrast(st.hex, ink)} />
                         </td>
                         <td className={s.aliasList}>{def.join(" · ") || "—"}</td>
                         <td className={s.aliasList}>{plate.join(" · ") || "—"}</td>
@@ -486,17 +535,20 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                   <tbody>
                     {list.map((a) => (
                       <tr key={a.name} data-alias={a.name}>
-                        <td className={s.mono}>{a.name}</td>
                         <td className={s.mono}>
-                          <Swatch value={hex(a.name)} /> {refName(a.value)}
-                          {isHex(hex(a.name)) && refName(a.value) !== hex(a.name) && (
-                            <span className={s.quiet}> {hex(a.name)}</span>
-                          )}
+                          <CopyValue value={a.name} />
+                        </td>
+                        <td className={s.mono}>
+                          <Swatch value={hex(a.name)} />{" "}
+                          {a.value.startsWith("var(") && <>{refName(a.value)} </>}
+                          <CopyValue value={hex(a.name)} />
                         </td>
                         <td className={s.mono}>
                           {a.plate ? (
                             <>
-                              <Swatch value={hex(a.name, true)} /> {refName(a.plate)}
+                              <Swatch value={hex(a.name, true)} />{" "}
+                              {a.plate.startsWith("var(") && <>{refName(a.plate)} </>}
+                              <CopyValue value={hex(a.name, true)} />
                             </>
                           ) : (
                             <span className={s.quiet}>same</span>
@@ -532,11 +584,13 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                     <span className={s.stateLabel}>{st.label}</span>
                     {st.token ? (
                       <span className={s.mono}>
-                        <Swatch value={colour} /> {st.token} → {refName(byName[st.token].value)} {colour}
+                        <Swatch value={colour} /> <CopyValue value={st.token} /> →{" "}
+                        {refName(byName[st.token].value)} <CopyValue value={colour} />
                         {st.soft && (
                           <>
                             {" · "}
-                            <Swatch value={soft ?? ""} /> {st.soft}
+                            <Swatch value={soft ?? ""} /> <CopyValue value={st.soft} />{" "}
+                            <CopyValue value={soft ?? ""} />
                           </>
                         )}
                       </span>
@@ -544,7 +598,7 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                       <span className={s.mono}>
                         {st.carriers?.map((c) => (
                           <span key={c} className={s.carrier}>
-                            <Swatch value={hex(c)} /> {c}
+                            <Swatch value={hex(c)} /> <CopyValue value={c} />
                           </span>
                         ))}
                       </span>
@@ -572,11 +626,11 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                       <>
                         <dt>Contrast</dt>
                         <dd>
-                          On chalk-100 <Grade r={onChalk} />
+                          On chalk-100 <Ratio r={onChalk} />
                           {onSoft !== null && (
                             <>
                               {" "}
-                              · on its soft ground <Grade r={onSoft} />
+                              · on its soft ground <Ratio r={onSoft} />
                             </>
                           )}
                           {grade(onChalk) !== "AA" && (
@@ -631,7 +685,7 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                     <Swatch value={hex(fg)} /> {fg.slice(2)} on <Swatch value={hex(bg)} /> {bg.slice(2)}
                   </td>
                   <td>
-                    <Grade r={contrast(hex(fg), hex(bg))} />
+                    <Ratio r={contrast(hex(fg), hex(bg))} />
                   </td>
                   <td>{what}</td>
                 </tr>
@@ -681,7 +735,9 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
             <tbody>
               {TYPE_FACES.map((f) => (
                 <tr key={f.token}>
-                  <td className={s.mono}>{f.token}</td>
+                  <td className={s.mono}>
+                    <CopyValue value={f.token} />
+                  </td>
                   <td style={{ fontFamily: `var(${f.token})`, fontSize: 20 }}>{f.face}</td>
                   <td>{f.job}</td>
                 </tr>
@@ -695,7 +751,7 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
             {byPrefix(typeTokens, "--stretch-").map((t) => (
               <div key={t.name} className={s.widthRow} data-token={t.name}>
                 <span className={s.mono}>
-                  {t.name} · {t.value}
+                  <CopyValue value={t.name} /> · <CopyValue value={t.value} />
                   {t.note && <span className={s.quiet}> — {t.note}</span>}
                 </span>
                 <span
@@ -725,8 +781,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
             <tbody>
               {byPrefix(typeTokens, "--size-").map((t) => (
                 <tr key={t.name} data-token={t.name}>
-                  <td className={s.mono}>{t.name}</td>
-                  <td className={s.mono}>{t.value}</td>
+                  <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                  <td className={s.mono}>
+                        <CopyValue value={t.value} />
+                      </td>
                   <td className={s.quiet}>{px(t.value) <= 25 ? "Reading" : "Register"}</td>
                   <td className={s.sampleCell}>
                     <span style={{ fontFamily: "var(--font-display)", fontSize: `var(${t.name})`, lineHeight: 1 }}>
@@ -754,7 +814,9 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                 const role = TYPE_ROLES[t.name];
                 return (
                   <tr key={t.name} data-token={t.name}>
-                    <td className={s.mono}>{t.name}</td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
                     <td className={s.sampleCell}>
                       <span
                         style={{
@@ -789,8 +851,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                     .filter((t) => g.p.split("|").some((p) => t.name.startsWith(p)))
                     .map((t) => (
                       <tr key={t.name} data-token={t.name}>
-                        <td className={s.mono}>{t.name}</td>
-                        <td className={s.mono}>{t.value}</td>
+                        <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                        <td className={s.mono}>
+                        <CopyValue value={t.value} />
+                      </td>
                         <td className={s.quiet}>{t.note ?? ""}</td>
                       </tr>
                     ))}
@@ -807,8 +873,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
           <div className={s.spaces}>
             {byPrefix(byFile.spacing, "--space-").map((t) => (
               <div key={t.name} className={s.spaceRow} data-token={t.name}>
-                <span className={s.mono}>{t.name}</span>
-                <span className={s.mono}>{t.value}</span>
+                <span className={s.mono}>
+                  <CopyValue value={t.name} />
+                </span>
+                <span className={s.mono}>
+                  <CopyValue value={t.value} />
+                </span>
                 <span className={s.spaceBar} style={{ width: t.value }} aria-hidden="true" />
               </div>
             ))}
@@ -822,8 +892,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                   .filter((t) => FRAME_NOTES[t.name])
                   .map((t) => (
                     <tr key={t.name} data-token={t.name}>
-                      <td className={s.mono}>{t.name}</td>
-                      <td className={s.mono}>{t.value}</td>
+                      <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                      <td className={s.mono}>
+                        <CopyValue value={t.value} />
+                      </td>
                       <td>{FRAME_NOTES[t.name]}</td>
                     </tr>
                   ))}
@@ -838,8 +912,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                   ...byFile.spacing.filter((t) => /^--(control|tap|tally|stamp)-/.test(t.name)),
                 ].map((t) => (
                   <tr key={t.name} data-token={t.name}>
-                    <td className={s.mono}>{t.name}</td>
-                    <td className={s.mono}>{t.value}</td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.value} />
+                      </td>
                     <td className={s.quiet}>{t.note ?? ""}</td>
                   </tr>
                 ))}
@@ -858,8 +936,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
               <tbody>
                 {byPrefix(byFile.spacing, "--radius-").map((t) => (
                   <tr key={t.name} data-token={t.name}>
-                    <td className={s.mono}>{t.name}</td>
-                    <td className={s.mono}>{t.value}</td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.value} />
+                      </td>
                   </tr>
                 ))}
               </tbody>
@@ -871,8 +953,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
               <tbody>
                 {byFile.elevation.map((t) => (
                   <tr key={t.name} data-token={t.name}>
-                    <td className={s.mono}>{t.name}</td>
-                    <td className={`${s.mono} ${s.quiet}`}>{t.value}</td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                    <td className={`${s.mono} ${s.quiet}`}>
+                      <CopyValue value={t.value} />
+                    </td>
                     <td className={s.quiet}>{t.note ?? ""}</td>
                   </tr>
                 ))}
@@ -936,8 +1022,12 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
                 .filter((t) => /^--(duration|ease)-/.test(t.name))
                 .map((t) => (
                   <tr key={t.name} data-token={t.name}>
-                    <td className={s.mono}>{t.name}</td>
-                    <td className={s.mono}>{t.value}</td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.name} />
+                      </td>
+                    <td className={s.mono}>
+                        <CopyValue value={t.value} />
+                      </td>
                   </tr>
                 ))}
             </tbody>
@@ -991,7 +1081,9 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
             {COMPONENTS.map((c) => (
               <tr key={c.name} data-component={c.name}>
                 <td className={s.quiet}>{c.group}</td>
-                <td className={s.mono}>{c.name}</td>
+                <td className={s.mono}>
+                  <CopyValue value={c.name} />
+                </td>
                 <td>{c.purpose}</td>
                 <td className={s.mono}>
                   {c.specimen ? (
@@ -1057,7 +1149,9 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
             <tbody>
               {TEMPLATES.filter((t) => t.canvas === "slide").map((t) => (
                 <tr key={t.code}>
-                  <td className={s.mono}>{t.code}</td>
+                  <td className={s.mono}>
+                    <CopyValue value={t.code} />
+                  </td>
                   <td>{t.name}</td>
                   <td className={s.quiet}>{t.platform}</td>
                   <td className={s.mono}>{t.status ?? "rendered"}</td>
@@ -1111,9 +1205,11 @@ export function Guidelines({ tokens }: { tokens: TokenSet }) {
             <tbody>
               {(Object.keys(CANVASES) as CanvasName[]).map((c) => (
                 <tr key={c} data-canvas={c}>
-                  <td className={s.mono}>{c}</td>
                   <td className={s.mono}>
-                    {CANVASES[c].w}×{CANVASES[c].h}
+                    <CopyValue value={c} />
+                  </td>
+                  <td className={s.mono}>
+                    <CopyValue value={`${CANVASES[c].w}×${CANVASES[c].h}`} />
                   </td>
                   <td>{CANVASES[c].label}</td>
                   <td className={s.mono}>
