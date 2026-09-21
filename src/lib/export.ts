@@ -283,3 +283,17 @@ export async function downloadAsset(url: string, name?: string): Promise<string>
   download(file.blob, file.name);
   return file.name;
 }
+
+/* ----------------------------------------------------------------- text ---- */
+
+/**
+ * Hand over a text file — the brand context pack as Markdown.
+ *
+ * `download` takes any blob, so this is a name and a media type, not a new
+ * mechanism. The pack already ships plain text inside the brand kit ZIP
+ * (`USAGE.txt`); this is the same idea with its own file.
+ */
+export function downloadText(text: string, filename: string, mime = "text/markdown"): string {
+  download(new Blob([text], { type: `${mime};charset=utf-8` }), filename);
+  return filename;
+}

@@ -4,6 +4,7 @@
  */
 import type { CanvasName, ThemeName } from "@/design-system/components/social/PostCanvas";
 import type { QualityScore } from "@/lib/quality";
+import type { BrandMark } from "@/design-system/brand/geometry";
 
 /**
  * Slide kinds the editor can produce. Superset of `CarouselSlideKind`.
@@ -24,7 +25,8 @@ export type SlideKind =
   | "thumb"
   | "compare"
   | "rank"
-  | "timeline";
+  | "timeline"
+  | "article";
 
 /**
  * Every kind, named. This exists for the build as much as for the UI: adding a
@@ -43,7 +45,15 @@ export const SLIDE_KIND_LABEL: Record<SlideKind, string> = {
   compare: "Two tallies",
   rank: "Ranking",
   timeline: "Timeline",
+  article: "Article header",
 };
+
+/** One size a template leaves in, and what that size is for. */
+export interface TemplateSize {
+  canvas: CanvasName;
+  /** Shown beside the size in the editor, so a size is never just a number. */
+  use: string;
+}
 
 export interface Template {
   code: string;
@@ -59,6 +69,12 @@ export interface Template {
   status?: "rendered" | "documented" | "held";
   /** Why it is not rendered. Shown in the rail, so the gap is stated. */
   note?: string;
+  /**
+   * Every size this one design leaves in. Absent means the single `canvas`,
+   * which is every template except the article header. The first entry is the
+   * default and matches `canvas`.
+   */
+  sizes?: TemplateSize[];
 }
 
 export interface Slide {
@@ -96,7 +112,19 @@ export interface EditorDoc {
    * "a piece nobody scored is a piece nobody owns".
    */
   score?: QualityScore;
+  /** The size on the stage. Absent, or not one of the template's sizes, means `template.canvas`. */
+  size?: CanvasName;
+  /** The mark the register foot names. Absent means the Okwe Knowledge imprint; "okwe" is the parent. */
+  brand?: Brand;
+  /**
+   * The destination in the register foot. Absent means okweknowledge.com — the
+   * only documented domain, so the other marks' addresses are typed, not guessed.
+   */
+  destination?: string;
 }
+
+/** Which mark a canvas carries: the parent, the Okwe Knowledge imprint, or a process. */
+export type Brand = BrandMark;
 
 export const TEMPLATES: Template[] = [
   {
@@ -302,10 +330,23 @@ export const TEMPLATES: Template[] = [
     code: "OKW-EDI-ARTICLE-01",
     name: "Article header",
     platform: "Editorial",
-    canvas: "landscape",
-    kinds: ["cover"],
-    status: "documented",
-    note: "Rendered on the page, not as an exportable canvas.",
+    /*
+     * "Site header: call number, headline, lede, class stamps" — the playbook's
+     * definition. It gives no pixel size, so the sizes are the platforms' own:
+     * LinkedIn Help (article cover 1920×1080; link preview 1.91:1), the brand's
+     * existing 1200×630 share card, the playbook's X size (OKW-SOC-X-INSIGHT-01)
+     * which also meets Medium Help's ≥1400px-wide 16:9 guidance, X's recommended
+     * 5:2 for an article image, and the feed square.
+     */
+    canvas: "slide",
+    kinds: ["article"],
+    sizes: [
+      { canvas: "slide", use: "LinkedIn article cover" },
+      { canvas: "share", use: "Share card · site, X and LinkedIn links" },
+      { canvas: "wide", use: "X article header · 5:2" },
+      { canvas: "landscape", use: "X post · Medium header" },
+      { canvas: "square", use: "Feed post" },
+    ],
   },
   {
     code: "OKW-EDI-QUOTE-01",

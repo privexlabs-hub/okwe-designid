@@ -7,6 +7,7 @@ import { Checkbox } from "@/design-system/components/forms/Checkbox";
 import { Field } from "@/design-system/components/forms/Field";
 import { Select } from "@/design-system/components/forms/Select";
 import { CANVASES } from "@/design-system/components/social/PostCanvas";
+import type { CanvasName } from "@/design-system/components/social/PostCanvas";
 import {
   ExportError,
   download,
@@ -21,7 +22,8 @@ import type { ExportTarget, SingleFormat } from "@/lib/export";
 import type { EditorDoc } from "@/content/templates";
 import { blockedReasons, scanText, verdictFor } from "@/lib/quality";
 import { deckFields } from "./Inspector";
-import { baseName, slideName } from "./naming";
+import { assetName, baseName, brandPrefix } from "./naming";
+import { activeCanvas, isSized, sizesOf } from "./canvas";
 import styles from "./editor.module.css";
 
 interface Formats {
@@ -41,6 +43,8 @@ export interface ExportDialogProps {
   getNodes: () => (HTMLElement | null)[];
   /** One slide as an export target, at its true canvas size. */
   targetFor: (index: number) => ExportTarget | null;
+  /** One slide at a named size, for templates that leave in several. */
+  targetForSize?: (index: number, canvas: CanvasName) => ExportTarget | null;
 }
 
 export function ExportDialog({
@@ -48,6 +52,7 @@ export function ExportDialog({
   onClose,
   getNodes,
   targetFor,
+  targetForSize,
 }: ExportDialogProps) {
   const [fmt, setFmt] = useState<Formats>({
     png: true,
@@ -62,6 +67,8 @@ export function ExportDialog({
   const [error, setError] = useState("");
   const [one, setOne] = useState("");
   const [override, setOverride] = useState(false);
+  const sized = isSized(doc);
+  const [sizes, setSizes] = useState<CanvasName[]>(() => sizesOf(doc).map((s) => s.canvas));
 
   /*
    * The gate.
@@ -80,23 +87,37 @@ export function ExportDialog({
   const gateHolds = reasons.length > 0 || (warns && !override);
 
   const base = baseName(doc);
-  const name = (i: number) => slideName(doc, i);
+
+  /* The sizes this export covers, in the template's order. A single-size
+     template covers exactly its one canvas, so its files are unchanged. */
+  const chosen: CanvasName[] = sized
+    ? sizesOf(doc)
+        .map((s) => s.canvas)
+        .filter((c) => sizes.includes(c))
+    : [activeCanvas(doc)];
+  const targetAt = (i: number, canvas: CanvasName) =>
+    targetForSize ? targetForSize(i, canvas) : targetFor(i);
 
   /**
    * Exactly the files the Export button will produce, in the order it makes
    * them — and each one is individually downloadable from its own row.
    */
-  const files: { name: string; slide: number | null; format: SingleFormat }[] =
-    [];
-  doc.slides.forEach((_, i) => {
-    if (fmt.png)
-      files.push({ name: `${name(i)}.png`, slide: i, format: "png" });
-    if (fmt.jpg)
-      files.push({ name: `${name(i)}.jpg`, slide: i, format: "jpg" });
-    if (fmt.svg)
-      files.push({ name: `${name(i)}.svg`, slide: i, format: "svg" });
+  const files: {
+    name: string;
+    slide: number | null;
+    format: SingleFormat;
+    canvas: CanvasName;
+  }[] = [];
+  chosen.forEach((canvas) => {
+    doc.slides.forEach((_, i) => {
+      const n = assetName(doc, i, canvas);
+      if (fmt.png) files.push({ name: `${n}.png`, slide: i, format: "png", canvas });
+      if (fmt.jpg) files.push({ name: `${n}.jpg`, slide: i, format: "jpg", canvas });
+      if (fmt.svg) files.push({ name: `${n}.svg`, slide: i, format: "svg", canvas });
+    });
   });
-  if (fmt.pdf) files.push({ name: `${base}.pdf`, slide: null, format: "pdf" });
+  if (fmt.pdf && chosen.length)
+    files.push({ name: `${base}.pdf`, slide: null, format: "pdf", canvas: chosen[0] });
   const names = files.map((f) => f.name);
   const delivered =
     fmt.zip && names.length > 0 ? [`${base}-package.zip`] : names;
@@ -108,20 +129,22 @@ export function ExportDialog({
     name: string;
     slide: number | null;
     format: SingleFormat;
+    canvas: CanvasName;
   }) {
     setError("");
     setOne(file.name);
     try {
       if (file.slide === null) {
         // The combined PDF spans every slide, so it is built from all targets.
-        const targets = doc.slides
-          .map((_, i) => targetFor(i))
+        // One page per slide per chosen size; toPdf sizes each page to its target.
+        const targets = chosen
+          .flatMap((c) => doc.slides.map((_, i) => targetAt(i, c)))
           .filter((t): t is ExportTarget => t !== null);
         if (!targets.length)
           throw new ExportError("Nothing was rendered to export.");
         download(await toPdf(targets, { scale: px() }), file.name);
       } else {
-        const target = targetFor(file.slide);
+        const target = targetAt(file.slide, file.canvas);
         if (!target) throw new ExportError("That slide is not rendered yet.");
         const packaged = await exportOne(target, file.format, { scale: px() });
         download(packaged.blob, packaged.name);
@@ -143,15 +166,25 @@ export function ExportDialog({
     setError("");
     setBusy(true);
     try {
-      const nodes = getNodes();
-      const spec = CANVASES[doc.template.canvas];
       const targets: ExportTarget[] = [];
-      doc.slides.forEach((_, i) => {
-        const node = nodes[i];
-        if (node) {
-          targets.push({ node, width: spec.w, height: spec.h, name: name(i) });
-        }
-      });
+      if (sized) {
+        chosen.forEach((canvas) =>
+          doc.slides.forEach((_, i) => {
+            const target = targetAt(i, canvas);
+            if (target) targets.push(target);
+          }),
+        );
+      } else {
+        const nodes = getNodes();
+        const canvas = activeCanvas(doc);
+        const spec = CANVASES[canvas];
+        doc.slides.forEach((_, i) => {
+          const node = nodes[i];
+          if (node) {
+            targets.push({ node, width: spec.w, height: spec.h, name: assetName(doc, i, canvas) });
+          }
+        });
+      }
       if (!targets.length)
         throw new ExportError("Nothing was rendered to export.");
 
@@ -335,6 +368,34 @@ export function ExportDialog({
               onChange={(e) => setScale(e.target.value)}
             />
           </Field>
+          {sized && (
+            <>
+              <span
+                style={{
+                  font: "var(--type-label)",
+                  letterSpacing: "var(--tracking-label)",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Sizes
+              </span>
+              {sizesOf(doc).map((s) => (
+                <Checkbox
+                  key={s.canvas}
+                  label={`${CANVASES[s.canvas].w} × ${CANVASES[s.canvas].h} — ${s.use}`}
+                  checked={sizes.includes(s.canvas)}
+                  onChange={() =>
+                    setSizes((cur) =>
+                      cur.includes(s.canvas)
+                        ? cur.filter((c) => c !== s.canvas)
+                        : [...cur, s.canvas],
+                    )
+                  }
+                />
+              ))}
+            </>
+          )}
         </div>
         <div
           style={{
@@ -392,7 +453,11 @@ export function ExportDialog({
             style={{ font: "var(--type-caption)", color: "var(--text-muted)" }}
           >
             Any single file can be taken on its own with <b>Get</b>. Names
-            follow <b>okwe-knowledge-[series]-[topic]-slide-NN</b>. Files are
+            follow{" "}
+            <b>
+              {brandPrefix(doc)}-[series]-[topic]-slide-NN{sized ? "-WxH" : ""}
+            </b>
+            . Files are
             rendered in the browser and downloaded straight to this device —
             with ZIP checked they arrive as one archive. The PDF is a raster
             image of each slide, so its text is not selectable.

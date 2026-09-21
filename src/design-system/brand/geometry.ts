@@ -23,26 +23,46 @@ export const seedGap = (size: number) => Math.round(size * SEEDS.gapRatio);
 export const seedRing = (size: number) => Math.max(1, Math.round(size * SEEDS.ringRatio));
 
 /**
- * The arms of the Okwe ecosystem. The parent, Okwe, is the ABSENCE of an arm.
+ * The three processes of Okwe Import Export Solutions — Okwe Knows, Okwe Coms,
+ * Okwe Move — as the owner's business document names them: "three operational
+ * components of one integrated Okwe Import Export Solutions business", not
+ * separate businesses. The parent, Okwe, is the ABSENCE of a process word.
  *
  * A closed union, not free text: the wordmark is not a generic text renderer,
- * and nobody should be able to mint an arm by passing a string.
+ * and nobody should be able to mint a mark by passing a string.
  *
- * The source documents no sub-brand marks at all, so this is derived from the
- * rules the system does state — one mark, one palette, the arm named in muted
- * ink. Arms are never differentiated by colour: verdigris and stamp red are
- * already bound to meanings (interpretation/success, opinion/danger), and
+ * The playbook documents no sub-brand marks, so the rule is derived from what
+ * the system does state — one mark, one palette, the process named in muted
+ * ink. Processes are never differentiated by colour: verdigris and stamp red
+ * are already bound to meanings (interpretation/success, opinion/danger), and
  * sulphur never carries type.
  */
-export const LOGO_ARMS = ["knowledge", "comms", "move"] as const;
+export const LOGO_ARMS = ["knows", "coms", "move"] as const;
 export type LogoArm = (typeof LOGO_ARMS)[number];
 
 /** The qualifier word, set in MUTED beside or beneath OKWE. */
 export const ARM_WORD: Record<LogoArm, string> = {
-  knowledge: "Knowledge",
-  comms: "Comms",
+  knows: "Knows",
+  coms: "Coms",
   move: "Move",
 };
+
+/**
+ * The publishing imprint. Okwe Knowledge is how Okwe Knows publishes: the
+ * playbook, the site, the handles and the export names all carry it, so its
+ * word is kept. It is not a process, so it cannot be passed as an arm.
+ */
+export const IMPRINT_WORD = "Knowledge";
+
+/** Every mark a canvas or a file can carry: the parent, the imprint, or a process. */
+export type BrandMark = "okwe" | "knowledge" | LogoArm;
+
+/** The qualifier word for a mark. The parent has none — that absence is what makes it the parent. */
+export function brandWord(brand: BrandMark): string | null {
+  if (brand === "okwe") return null;
+  if (brand === "knowledge") return IMPRINT_WORD;
+  return ARM_WORD[brand];
+}
 
 /**
  * Archivo at 125% width advances roughly this much per character, as a

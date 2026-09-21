@@ -8,7 +8,12 @@ import { Select } from "@/design-system/components/forms/Select";
 import { Switch } from "@/design-system/components/forms/Switch";
 import { Checkbox } from "@/design-system/components/forms/Checkbox";
 import { CONTENT_TYPES, SERIES, THEMES } from "@/content/templates";
-import type { EditorDoc, Slide } from "@/content/templates";
+import type { Brand, EditorDoc, Slide } from "@/content/templates";
+import { ARM_WORD, IMPRINT_WORD, LOGO_ARMS } from "@/design-system/brand/geometry";
+import { CANVASES } from "@/design-system/components/social/PostCanvas";
+import type { CanvasName } from "@/design-system/components/social/PostCanvas";
+import { LEDE_FIT } from "@/design-system/components/social/ArticleCard";
+import { activeCanvas, isSized, sizesOf } from "./canvas";
 import {
   CRITERIA,
   DATA_KINDS,
@@ -31,6 +36,16 @@ const LABEL: CSSProperties = {
   textTransform: "uppercase",
   color: "var(--text-muted)",
 };
+
+/**
+ * The marks a canvas can carry: the Okwe Knowledge imprint first (the default),
+ * then the three processes read from the process list, then the parent.
+ */
+const BRANDS = [
+  { value: "knowledge", label: `Okwe ${IMPRINT_WORD}` },
+  ...LOGO_ARMS.map((arm) => ({ value: arm, label: `Okwe ${ARM_WORD[arm]}` })),
+  { value: "okwe", label: "Okwe" },
+];
 
 const SECTION: CSSProperties = {
   display: "flex",
@@ -58,6 +73,9 @@ export interface InspectorProps {
 /** Right rail: piece metadata, the active slide's copy, canvas, quality gate. */
 export function Inspector({ doc, slide, set, setSlide, setActive, onScore }: InspectorProps) {
   const chars = (slide.title || "").length;
+  // The article header reads Body as its subtitle and draws no principle.
+  const article = slide.kind === "article";
+  const ledeChars = (slide.body || "").length;
 
   return (
     <aside aria-label="Inspector" className={styles.inspector}>
@@ -120,11 +138,22 @@ export function Inspector({ doc, slide, set, setSlide, setActive, onScore }: Ins
             onChange={(e) => setSlide({ title: e.target.value })}
           />
         </Field>
-        <Field label="Body" htmlFor="bd">
+        <Field
+          label={article ? "Subtitle" : "Body"}
+          hint={
+            article
+              ? ledeChars > LEDE_FIT
+                ? `Longer than the share card holds — cut to ${LEDE_FIT}.`
+                : `${ledeChars}/${LEDE_FIT} characters`
+              : undefined
+          }
+          htmlFor="bd"
+        >
           <Input
             id="bd"
             multiline
             rows={3}
+            invalid={article && ledeChars > LEDE_FIT}
             value={slide.body || ""}
             onChange={(e) => setSlide({ body: e.target.value })}
           />
@@ -299,14 +328,16 @@ export function Inspector({ doc, slide, set, setSlide, setActive, onScore }: Ins
             />
           </>
         )}
-        <Field label="Principle" hint="Optional closing line." htmlFor="pr">
-          <Input
-            id="pr"
-            size="sm"
-            value={slide.principle || ""}
-            onChange={(e) => setSlide({ principle: e.target.value })}
-          />
-        </Field>
+        {!article && (
+          <Field label="Principle" hint="Optional closing line." htmlFor="pr">
+            <Input
+              id="pr"
+              size="sm"
+              value={slide.principle || ""}
+              onChange={(e) => setSlide({ principle: e.target.value })}
+            />
+          </Field>
+        )}
       </div>
 
       <div style={SECTION_RULED}>
@@ -346,6 +377,49 @@ export function Inspector({ doc, slide, set, setSlide, setActive, onScore }: Ins
             />
           ))}
         </div>
+        {/* Plain selects, never role="group": verify-additions.mjs reads the first
+            ten role="group" elements on the page as the score scale. */}
+        {isSized(doc) && (
+          <>
+            <Field
+              label="Size"
+              hint={sizesOf(doc).find((s) => s.canvas === activeCanvas(doc))?.use}
+              htmlFor="sz"
+            >
+              <Select
+                id="sz"
+                size="sm"
+                options={sizesOf(doc).map((s) => ({
+                  value: s.canvas,
+                  label: `${CANVASES[s.canvas].w} × ${CANVASES[s.canvas].h}`,
+                }))}
+                value={activeCanvas(doc)}
+                onChange={(e) => set({ size: e.target.value as CanvasName })}
+              />
+            </Field>
+            <Field label="Mark" hint="The mark named in the register foot." htmlFor="brand">
+              <Select
+                id="brand"
+                size="sm"
+                options={BRANDS}
+                value={doc.brand ?? "knowledge"}
+                onChange={(e) => set({ brand: e.target.value as Brand })}
+              />
+            </Field>
+            <Field
+              label="Destination"
+              hint="Printed in the register foot. Only okweknowledge.com is documented."
+              htmlFor="dest"
+            >
+              <Input
+                id="dest"
+                size="sm"
+                value={doc.destination ?? "okweknowledge.com"}
+                onChange={(e) => set({ destination: e.target.value })}
+              />
+            </Field>
+          </>
+        )}
         <Field
           label="Image"
           hint="Not wired up. Photography is placed in the thumbnail template."
@@ -557,6 +631,9 @@ export function deckFields(doc: EditorDoc): TextField[] {
   const out: TextField[] = [];
   doc.slides.forEach((slide, i) => {
     (["eyebrow", "title", "body", "principle", "cta"] as const).forEach((field) => {
+      // An article header draws neither; scanning them would flag words that
+      // are not on the asset.
+      if (slide.kind === "article" && (field === "principle" || field === "cta")) return;
       const text = slide[field];
       if (typeof text === "string" && text) out.push({ slide: i, field, text });
     });

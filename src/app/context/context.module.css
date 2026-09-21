@@ -1,0 +1,222 @@
+/* OKW-CTX-01 — the brand context pack, laid out as a ledger.
+   Breakpoint literals mirror the tokens in design-system/tokens/breakpoints.css
+   (custom properties cannot be read inside @media):
+     --bp-lg 1100px · --bp-md 860px · --bp-sm 600px
+   Rules, not boxes: no shadow, no radius, no card border. */
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--space-9) var(--page-margin-fluid) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  border-bottom: var(--rule-thick) solid var(--rule-ink);
+  padding-bottom: var(--space-7);
+}
+
+.back {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow {
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.lede {
+  font: var(--type-lede);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+.mono {
+  font: var(--type-data);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.body {
+  font: var(--type-body);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.h2 {
+  font-size: var(--size-2xl);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ row ---- */
+
+.row {
+  display: grid;
+  grid-template-columns: var(--rail-index) minmax(0, 1fr) var(--rail-margin);
+  grid-template-areas: "rail field margin";
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  align-items: start;
+}
+
+.rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.num {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-quiet);
+}
+
+.field {
+  grid-area: field;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.title {
+  font: var(--type-h4);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.note {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+/* The Markdown source. `white-space: pre` keeps table columns aligned, so the
+   box scrolls in itself — .okwe-scroll-x, the system's existing rule for dense
+   blocks — and the page never does. */
+.preview {
+  font-family: var(--font-mono);
+  font-size: var(--size-3xs);
+  line-height: 1.7;
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding: var(--space-4);
+  margin: 0;
+  min-width: 0;
+  max-height: 22rem;
+  overflow: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.preview:focus-visible {
+  outline: var(--focus-ring-width) solid var(--rule-mark);
+  outline-offset: 2px;
+}
+
+.margin {
+  grid-area: margin;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.meta {
+  font: var(--type-data);
+  font-size: 10px;
+  letter-spacing: var(--tracking-call);
+  color: var(--text-quiet);
+  overflow-wrap: anywhere;
+}
+
+/* ----------------------------------------------------------- responsive ---- */
+
+/* --bp-lg: 1100px — the annotation margin folds under the field, and its
+   contents run along one line the way a footnote does. */
+@media (max-width: 1100px) {
+  .row {
+    grid-template-columns: var(--rail-index) minmax(0, 1fr);
+    grid-template-areas:
+      "rail field"
+      ".    margin";
+  }
+  .margin {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-5);
+  }
+}
+
+/* --bp-md: 860px — the rail narrows; headings scale with the viewport. */
+@media (max-width: 860px) {
+  .row {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .h2 {
+    font-size: clamp(23px, 5.4vw, var(--size-2xl));
+  }
+}
+
+/* --bp-sm: 600px — one column. The checkbox and its number share a line so the
+   list still reads as numbered, and the preview gives back vertical room. */
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "rail"
+      "field"
+      "margin";
+    gap: var(--space-4);
+  }
+  .rail {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .preview {
+    max-height: 14rem;
+    padding: var(--space-3);
+  }
+  .actions {
+    gap: var(--space-2);
+  }
+}

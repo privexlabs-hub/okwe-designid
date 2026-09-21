@@ -31,7 +31,9 @@ export interface LogoAssetIcon {
 export interface LogoBrand {
   id: string;
   name: string;
-  /** `null` for the parent, whose mark is the wordmark alone. */
+  /** The parent (wordmark alone), a process, or the Okwe Knowledge imprint. */
+  kind: "parent" | "process" | "imprint";
+  /** Set for a process only; `null` for the parent and the imprint. */
   arm: LogoArm | null;
   note: string;
   lockups: LogoAssetLockup[];
@@ -47,7 +49,7 @@ export interface SharedAsset {
 export interface LogoManifest {
   note: string;
   generatedBy: string;
-  /** The arm rule, in full. Shown on the page and written into the kit. */
+  /** The logo rule, in full. Shown on the page and written into the kit. */
   rule: string;
   brands: LogoBrand[];
   shared: SharedAsset[];
@@ -68,6 +70,6 @@ export function readableBytes(bytes: number): string {
 export const BRAND_INTRO = {
   code: "OKW-BRAND-01",
   title: "Brand assets",
-  lede: "Every mark for the four arms of the Okwe ecosystem, with the rule that governs them. Vector masters are generated from the same numbers the components read, so what you download is what the system draws.",
+  lede: "Every mark for Okwe, its three processes — Knows, Coms and Move — and the Okwe Knowledge imprint, with the rule that governs them. Vector masters are generated from the same numbers the components read, so what you download is what the system draws.",
   foot: "Vector is generated at build. Raster is rendered here, from the mark you are looking at.",
 } as const;

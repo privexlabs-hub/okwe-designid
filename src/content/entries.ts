@@ -1,5 +1,5 @@
 /**
- * The eight register entries on the index page.
+ * The ten register entries on the index page.
  * Copy is verbatim from "Okwe Knowledge.dc.html"; only the hrefs are rewritten
  * from Design Canvas file paths to Next routes.
  */
@@ -64,9 +64,23 @@ export const ENTRIES: RegisterEntry[] = [
   {
     num: "08",
     title: "Brand assets",
-    body: "Every mark for the four arms — Okwe, Okwe Knowledge, Okwe Comms and Okwe Move — with the rule that governs them. Stacked, horizontal, wordmark and avatar lockups, app icons and document watermarks, downloadable as vector, raster or one kit.",
-    meta: "OKW-BRAND-01 · FOUR ARMS",
+    body: "Every mark for Okwe, its three processes — Okwe Knows, Okwe Coms and Okwe Move — and the Okwe Knowledge imprint, with the rule that governs them. Stacked, horizontal, wordmark and avatar lockups, app icons and document watermarks, downloadable as vector, raster or one kit.",
+    meta: "OKW-BRAND-01 · FIVE MARKS",
     href: "/brand",
+  },
+  {
+    num: "09",
+    title: "Brand context",
+    body: "Everything above, as plain Markdown you can paste into any model. Strategy, voice, the playbooks, the template codes, the publishing gate and the profiles — eleven sections, each copyable on its own, or downloadable as one file.",
+    meta: "OKW-CTX-01 · ELEVEN SECTIONS",
+    href: "/context",
+  },
+  {
+    num: "10",
+    title: "Brand guidelines",
+    body: "How Okwe looks and sounds, in one place: the business and its three processes, the marks, every colour and when to use it — info, success, warning, error, highlight — type, space, the recurring devices, the voice, components, slides, UI kits and governance. Every value is read from the design tokens.",
+    meta: "OKW-GUIDE-01 · TWELVE SECTIONS",
+    href: "/guidelines",
   },
 ];
 
@@ -75,6 +89,6 @@ export const MASTHEAD = {
   callNumber: "OKW·OS/01 · OPERATING SYSTEM · 19 AUG 2026",
   strapline: "TWO PEOPLE · THREE PILLARS · ONE REGISTER",
   headline: "The publishing operating system",
-  lede: "How Okwe looks, how it sounds, what it publishes, how one idea becomes many assets, and how content becomes products. Eight entries. Everything a two-person team needs to publish from day one.",
+  lede: "How Okwe looks, how it sounds, what it publishes, how one idea becomes many assets, and how content becomes products. Ten entries. Everything a two-person team needs to publish from day one.",
   destination: "okweknowledge.com · one idea a week",
 } as const;

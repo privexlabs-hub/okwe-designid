@@ -54,3 +54,7 @@ export { RankCard } from "./components/social/RankCard";
 export type { RankCardProps, RankRow } from "./components/social/RankCard";
 export { TimelineCard } from "./components/social/TimelineCard";
 export type { TimelineCardProps, TimelineEvent } from "./components/social/TimelineCard";
+
+/* The article header (OKW-EDI-ARTICLE-01), in every size an article leaves in. */
+export { ArticleCard, ARTICLE_CANVASES, ARTICLE_TYPE, LEDE_FIT, isArticleCanvas } from "./components/social/ArticleCard";
+export type { ArticleCardProps, ArticleCanvas } from "./components/social/ArticleCard";

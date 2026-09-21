@@ -1,5 +1,7 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { callNumberString } from "../notation/CallNumber";
+import { brandWord } from "../../brand/geometry";
+import type { BrandMark } from "../../brand/geometry";
 
 /**
  * Canvas registry — every social/publishing surface is the same ledger sheet
@@ -15,6 +17,8 @@ export const CANVASES = {
   slide: { w: 1920, h: 1080, label: "Slide / video graphic" },
   banner: { w: 1500, h: 500, label: "X header" },
   report: { w: 1240, h: 1754, label: "A4 report page" },
+  share: { w: 1200, h: 630, label: "Share card" },
+  wide: { w: 1500, h: 600, label: "X article · 5:2" },
 } as const;
 
 export type CanvasName = keyof typeof CANVASES;
@@ -92,6 +96,13 @@ export interface PostCanvasProps extends Omit<HTMLAttributes<HTMLDivElement>, "c
   tally?: number;
   tallyTotal?: number;
   destination?: string;
+  /**
+   * The mark the register foot names. Defaults to "knowledge" — the Okwe
+   * Knowledge imprint every canvas has always carried — so existing canvases
+   * render exactly as they did. A process names Knows, Coms or Move; "okwe" is
+   * the parent, the wordmark alone.
+   */
+  brand?: BrandMark;
   showRegister?: boolean;
   showSafeZone?: boolean;
   children?: ReactNode;
@@ -110,6 +121,7 @@ export function PostCanvas({
   tally,
   tallyTotal = 100,
   destination = "okweknowledge.com",
+  brand = "knowledge",
   showRegister = true,
   showSafeZone = false,
   children,
@@ -246,6 +258,7 @@ export function PostCanvas({
         </div>
         {showRegister && (
           <div
+            data-register-foot
             style={{
               borderTop: `${1 * u}px solid ${t.rule}`,
               paddingTop: 16 * u,
@@ -281,7 +294,7 @@ export function PostCanvas({
                   textTransform: "uppercase",
                 }}
               >
-                Okwe <span style={{ color: t.muted }}>Knowledge</span>
+                Okwe {brandWord(brand) && <span style={{ color: t.muted }}>{brandWord(brand)}</span>}
               </span>
             </span>
             {tally !== undefined && (

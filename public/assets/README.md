@@ -42,27 +42,31 @@ ratios still match that module, so the two renderers cannot drift apart.
 The mark is the **seed row** — six counters from the okwe board, three sown in
 sulphur, three open — above the name in Archivo at 125% width.
 
-### The four arms
+### The marks
 
-One mark serves the whole ecosystem. The seed row never changes between arms;
-OKWE is always set at 125% width. An **arm** is one qualifier word in muted ink,
-beside the wordmark or beneath it. The parent, Okwe, is the wordmark **alone** —
-the absence of a word is what makes it the parent. Arms are never differentiated
+One mark serves the whole business, Okwe Import Export Solutions. The seed row
+never changes between marks; OKWE is always set at 125% width. A **process** —
+Knows, Coms or Move — is one qualifier word in muted ink, beside the wordmark or
+beneath it. The parent, Okwe, is the wordmark **alone** — the absence of a word
+is what makes it the parent. Okwe Knowledge, the publishing imprint of Okwe
+Knows, follows the same rule with its own word. Marks are never differentiated
 by colour: verdigris and stamp red already carry meanings, and sulphur never
-carries type. If you cannot tell two arms apart in greyscale, the lockup is
+carries type. If you cannot tell two marks apart in greyscale, the lockup is
 wrong.
 
-| Brand | Qualifier | Files |
-| --- | --- | --- |
-| Okwe | none — the parent | `okwe-*` |
-| Okwe Knowledge | `Knowledge` | `okwe-knowledge-*` |
-| Okwe Comms | `Comms` | `okwe-comms-*` |
-| Okwe Move | `Move` | `okwe-move-*` |
+| Mark | Kind | Qualifier | Files |
+| --- | --- | --- | --- |
+| Okwe | parent | none | `okwe-*` |
+| Okwe Knows | process | `Knows` | `okwe-knows-*` |
+| Okwe Coms | process | `Coms` | `okwe-coms-*` |
+| Okwe Move | process | `Move` | `okwe-move-*` |
+| Okwe Knowledge | publishing imprint | `Knowledge` | `okwe-knowledge-*` |
 
-The qualifier words live in `ARM_WORD` in `geometry.ts`; the generator keeps its
-own copy and **throws** if the two disagree, exactly as it does for the ratios.
+The process words live in `ARM_WORD` in `geometry.ts` and the imprint's in
+`IMPRINT_WORD`; the generator reads or copies both and **throws** if they
+disagree, exactly as it does for the ratios.
 
-Each of the four gets the same seven files, under its own prefix:
+Each of the five gets the same seven files, under its own prefix:
 
 | File | What it is |
 | --- | --- |
@@ -75,14 +79,14 @@ Each of the four gets the same seven files, under its own prefix:
 | `<prefix>icon-512.png` | 512×512, the same. |
 
 `logo.manifest.json` records every one of them — brand, variant, tone, real
-artboard size and byte length — plus the arm rule as one paragraph. The kit page
+artboard size and byte length — plus the logo rule as one paragraph. The kit page
 imports it, so its keys are a contract; do not edit it by hand.
 
 ### Shared across the ecosystem
 
 | File | What it is |
 | --- | --- |
-| `favicon.svg` | The seed row alone — at 16px the wordmark is unreadable, and the counters are the part that survives. Pure geometry, so it needs no font, and no arm could be read at that size, so all four share it. |
+| `favicon.svg` | The seed row alone — at 16px the wordmark is unreadable, and the counters are the part that survives. Pure geometry, so it needs no font, and no qualifier could be read at that size, so every mark shares it. |
 | `watermark-chalk.svg` | The seed row flat in `--cyanotype-100`, for chalk grounds. |
 | `watermark-plate.svg` | The same in `--cyanotype-800`, for the ink plate. |
 | `og-default.svg` / `.png` | 1200×630 share card, built as the register sheet rather than a centred logo. |

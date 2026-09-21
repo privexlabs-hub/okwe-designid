@@ -11,13 +11,16 @@ import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
 import { ComparisonCard } from "@/design-system/components/social/ComparisonCard";
 import { RankCard } from "@/design-system/components/social/RankCard";
 import { TimelineCard } from "@/design-system/components/social/TimelineCard";
+import { ArticleCard, isArticleCanvas } from "@/design-system/components/social/ArticleCard";
 import type { EditorDoc, Slide } from "@/content/templates";
+import { activeCanvas, sizesOf } from "./canvas";
 import styles from "./editor.module.css";
 
 /** On-screen render width for a canvas, from the source's Stage.jsx. */
 export function renderWidthFor(canvas: CanvasName): number {
   if (canvas === "story") return 300;
-  if (canvas === "slide" || canvas === "landscape") return 640;
+  if (canvas === "slide" || canvas === "landscape" || canvas === "share" || canvas === "wide")
+    return 640;
   if (canvas === "thumb") return 560;
   return 420;
 }
@@ -28,6 +31,11 @@ export interface SlideArtProps {
   /** Position in the deck, 1-based — the source used `doc.active + 1`. */
   index: number;
   width: number;
+  /**
+   * The size to draw. Defaults to the document's active size; the staging area
+   * passes every size so a multi-size template can export all of them.
+   */
+  canvas?: CanvasName;
 }
 
 /**
@@ -35,8 +43,8 @@ export interface SlideArtProps {
  * preview and the offscreen staging area the exporter captures from, so all
  * three are guaranteed to be the same artwork.
  */
-export function SlideArt({ doc, slide, index, width }: SlideArtProps) {
-  const canvas = doc.template.canvas;
+export function SlideArt({ doc, slide, index, width, canvas: size }: SlideArtProps) {
+  const canvas = size ?? activeCanvas(doc);
   const common = {
     renderWidth: width,
     series: doc.series,
@@ -122,22 +130,39 @@ export function SlideArt({ doc, slide, index, width }: SlideArtProps) {
     );
   }
 
+  if (slide.kind === "article") {
+    return (
+      <ArticleCard
+        {...common}
+        canvas={isArticleCanvas(canvas) ? canvas : "slide"}
+        theme={slide.theme}
+        classMark={doc.contentType}
+        eyebrow={slide.eyebrow}
+        title={slide.title}
+        lede={slide.body}
+        brand={doc.brand}
+        destination={doc.destination || undefined}
+      />
+    );
+  }
+
   /*
    * Every remaining kind is a carousel slide.
    *
-   * The `never` binding is load-bearing: the branches above are `if`s with this
-   * unconditional fallback, so adding a member to `SlideKind` without a branch
-   * would silently render the wrong card. This makes `tsc` fail at the exact
-   * place the bug would occur.
+   * The branches above return early, so by here `slide.kind` has been narrowed
+   * to what they did not handle. Assigning it to `CarouselSlideKind` with no
+   * cast is the guard: a member added to `SlideKind` without a branch leaves a
+   * kind that is not a carousel kind, and `tsc` fails on this line — where the
+   * wrong card would otherwise have rendered. (It used to be an `Exclude<>`
+   * followed by an `as` cast, which accepted anything and guarded nothing.)
    */
-  const remaining: Exclude<Slide["kind"], "stat" | "thumb" | "compare" | "rank" | "timeline"> =
-    slide.kind;
+  const remaining: CarouselSlideKind = slide.kind;
 
   return (
     <CarouselSlide
       {...common}
       canvas={canvas}
-      kind={remaining as CarouselSlideKind}
+      kind={remaining}
       theme={slide.theme}
       index={index}
       total={doc.slides.length}
@@ -190,11 +215,14 @@ export interface StageProps {
   slide: Slide;
   /** Download control for the slide on screen, rendered under the canvas. */
   action?: ReactNode;
+  /** Switch the size on the stage. Only offered when the template has several. */
+  onSize?: (canvas: CanvasName) => void;
 }
 
 /** Centre column: the active slide at preview size, with its measurements. */
-export function Stage({ doc, slide, action }: StageProps) {
-  const canvas = doc.template.canvas;
+export function Stage({ doc, slide, action, onSize }: StageProps) {
+  const canvas = activeCanvas(doc);
+  const sizes = sizesOf(doc);
   const { ref, width } = useFittedWidth(renderWidthFor(canvas));
 
   return (
@@ -211,8 +239,29 @@ export function Stage({ doc, slide, action }: StageProps) {
           <span>
             {CANVASES[canvas].w} × {CANVASES[canvas].h}
           </span>
-          <span>{doc.template.platform}</span>
+          <span>
+            {sizes.length > 1
+              ? sizes.find((s) => s.canvas === canvas)?.use
+              : doc.template.platform}
+          </span>
         </div>
+        {sizes.length > 1 && onSize && (
+          <div className={styles.sizeRow}>
+            {sizes.map((s) => (
+              <button
+                key={s.canvas}
+                type="button"
+                className={styles.sizeButton}
+                aria-pressed={s.canvas === canvas}
+                aria-label={`${CANVASES[s.canvas].w} by ${CANVASES[s.canvas].h} — ${s.use}`}
+                title={s.use}
+                onClick={() => onSize(s.canvas)}
+              >
+                {CANVASES[s.canvas].w}×{CANVASES[s.canvas].h}
+              </button>
+            ))}
+          </div>
+        )}
         {action}
       </div>
     </div>
@@ -223,6 +272,8 @@ export interface StagingAreaProps {
   doc: EditorDoc;
   /** Called with the wrapper node for each slide, by index. */
   registerNode: (index: number, node: HTMLDivElement | null) => void;
+  /** Called with the wrapper for each slide at every other size, for multi-size export. */
+  registerSizeNode?: (index: number, canvas: CanvasName, node: HTMLDivElement | null) => void;
 }
 
 /**
@@ -234,8 +285,13 @@ export interface StagingAreaProps {
  * off every screen, and `aria-hidden` plus `inert` keeps it out of the
  * accessibility tree and the tab order.
  */
-export function StagingArea({ doc, registerNode }: StagingAreaProps) {
-  const width = renderWidthFor(doc.template.canvas);
+export function StagingArea({ doc, registerNode, registerSizeNode }: StagingAreaProps) {
+  const active = activeCanvas(doc);
+  const width = renderWidthFor(active);
+  // Only a multi-size template has other sizes; everything else renders one pass, as before.
+  const others = sizesOf(doc)
+    .map((s) => s.canvas)
+    .filter((c) => c !== active);
   return (
     <div
       aria-hidden="true"
@@ -249,9 +305,21 @@ export function StagingArea({ doc, registerNode }: StagingAreaProps) {
     >
       {doc.slides.map((s, i) => (
         <div key={i} ref={(node) => registerNode(i, node)} style={{ width }}>
-          <SlideArt doc={doc} slide={s} index={i + 1} width={width} />
+          <SlideArt doc={doc} slide={s} index={i + 1} width={width} canvas={active} />
         </div>
       ))}
+      {registerSizeNode &&
+        others.flatMap((c) =>
+          doc.slides.map((s, i) => (
+            <div
+              key={`${c}-${i}`}
+              ref={(node) => registerSizeNode(i, c, node)}
+              style={{ width: renderWidthFor(c) }}
+            >
+              <SlideArt doc={doc} slide={s} index={i + 1} width={renderWidthFor(c)} canvas={c} />
+            </div>
+          )),
+        )}
     </div>
   );
 }

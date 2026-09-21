@@ -177,7 +177,7 @@ function StaticRow({ specimen, label, hint, file, bytes, dimensions, inverse }: 
 
 /* ------------------------------------------------------------------ page -- */
 
-/** OKW-BRAND-01 — every mark for the four arms, with the rule that governs them. */
+/** OKW-BRAND-01 — every mark: the parent, three processes and the imprint, with the rule that governs them. */
 export function Brand() {
   const [compact, setCompact] = useState(false);
   const targets = useRef(new Map<string, TargetGetter>());
@@ -270,18 +270,18 @@ export function Brand() {
         <p className={s.rule}>{LOGO_MANIFEST.rule}</p>
         <div className={s.corollaries}>
           <div className={s.corollary}>
-            <span className={s.corollaryHead}>The seed count is not an arm</span>
+            <span className={s.corollaryHead}>The seed count is not a process</span>
             <p className={s.corollaryNote}>
               Three of six, everywhere: three sown, three still open. Changing the count to mark
-              an arm changes what the mark says about the work, not who made it.
+              a process changes what the mark says about the work, not who made it.
             </p>
           </div>
           <div className={s.corollary}>
-            <span className={s.corollaryHead}>One favicon, four app icons</span>
+            <span className={s.corollaryHead}>One favicon, an app icon for each mark</span>
             <p className={s.corollaryNote}>
               The favicon is shared across the ecosystem because at 16px a qualifier word is
               unreadable, and an unreadable word is noise. The 180 and 512 icons have room to
-              name their arm, so they do.
+              name their mark, so they do.
             </p>
           </div>
         </div>
@@ -321,7 +321,7 @@ export function Brand() {
             Shared and applied
           </h2>
           <p className={s.note}>
-            The pieces that belong to no single arm, and the icons that belong to each.
+            The pieces that belong to no single mark, and the icons that belong to each.
           </p>
         </div>
 

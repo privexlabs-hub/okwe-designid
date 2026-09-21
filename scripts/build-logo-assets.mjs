@@ -7,9 +7,11 @@
  * ratios below are duplicated from nowhere: they are parsed out of that module
  * at build time. One geometry, two renderers, no drift.
  *
- * One mark serves the whole ecosystem. The parent, Okwe, is the wordmark alone;
- * an arm is one qualifier word in muted ink beside or beneath it. Arms are never
- * differentiated by colour — every brand below uses the same four constants.
+ * One mark serves the whole business, Okwe Import Export Solutions. The parent,
+ * Okwe, is the wordmark alone; a process (Knows, Coms, Move) is one qualifier
+ * word in muted ink beside or beneath it, and so is Okwe Knowledge, the
+ * publishing imprint of Okwe Knows. Marks are never differentiated by colour —
+ * every mark below uses the same four constants.
  *
  *   node scripts/build-logo-assets.mjs
  */
@@ -63,13 +65,13 @@ for (const [variant, vals] of Object.entries(LOCKUP)) {
 }
 
 /**
- * The qualifier word per arm. Duplicated from geometry.ts for the same reason
- * the ratios are — this is .mjs, there is no TS loader — and cross-checked the
- * same way, so a word can only be changed in one place.
+ * The qualifier word per process. Duplicated from geometry.ts for the same
+ * reason the ratios are — this is .mjs, there is no TS loader — and
+ * cross-checked the same way, so a word can only be changed in one place.
  */
 const ARM_WORD = {
-  knowledge: "Knowledge",
-  comms: "Comms",
+  knows: "Knows",
+  coms: "Coms",
   move: "Move",
 };
 {
@@ -84,6 +86,10 @@ const ARM_WORD = {
     if (!(arm in ARM_WORD)) throw new Error(`arm drift: ARM_WORD.${arm} exists in geometry.ts but not here`);
   }
 }
+
+/** The imprint's word, read from geometry.ts so it cannot drift either. */
+const IMPRINT_WORD = geomSrc.match(/IMPRINT_WORD\s*=\s*"([^"]+)"/)?.[1];
+if (!IMPRINT_WORD) throw new Error('geometry.ts: could not read IMPRINT_WORD');
 
 const INK = "#05161F";           // --cyanotype-900
 const CHALK = "#F1F3F1";         // --chalk-50
@@ -149,52 +155,68 @@ ${body}
    run for "OKWE". Used only to size the artboard, never to position the baseline. */
 const wordWidth = (fontSize, text) => Math.round(fontSize * 0.86 * text.length * 0.72);
 
-/* ---- The four brands. `arm: null` is the parent: the wordmark alone. ---- */
+/* ---- The marks. `kind` says what each one is: the parent (the wordmark alone),
+   one of the three processes, or the publishing imprint. Notes quote the owner's
+   business document. ---- */
 const BRANDS = [
   {
     id: "okwe",
     name: "Okwe",
+    kind: "parent",
     arm: null,
     prefix: "okwe-",
-    note: "The ecosystem mark. The wordmark alone, with no qualifier.",
+    note: "Okwe Import Export Solutions — the business. The wordmark alone, with no qualifier.",
   },
   {
-    id: "okwe-knowledge",
-    name: "Okwe Knowledge",
-    arm: "knowledge",
-    prefix: "okwe-knowledge-",
-    note: "The publishing arm: one idea a week, written down.",
+    id: "okwe-knows",
+    name: "Okwe Knows",
+    kind: "process",
+    arm: "knows",
+    prefix: "okwe-knows-",
+    note: "Knowledge & Intelligence. Know what is available, where it is available, who needs it, and how the trade can be executed.",
   },
   {
-    id: "okwe-comms",
-    name: "Okwe Comms",
-    arm: "comms",
-    prefix: "okwe-comms-",
-    note: "The messaging arm, carrying the same mark and a different word.",
+    id: "okwe-coms",
+    name: "Okwe Coms",
+    kind: "process",
+    arm: "coms",
+    prefix: "okwe-coms-",
+    note: "Communication & Commerce. Turn information and opportunities into commercial relationships and transactions.",
   },
   {
     id: "okwe-move",
     name: "Okwe Move",
+    kind: "process",
     arm: "move",
     prefix: "okwe-move-",
-    note: "The logistics arm, carrying the same mark and a different word.",
+    note: "Movement & Logistics. Get the right goods from the right place to the right destination efficiently.",
+  },
+  {
+    id: "okwe-knowledge",
+    name: "Okwe Knowledge",
+    kind: "imprint",
+    arm: null,
+    word: IMPRINT_WORD,
+    prefix: "okwe-knowledge-",
+    note: "The publishing imprint of Okwe Knows: one idea a week, written down. Its name, domain and file names stay as the playbook documents them.",
   },
 ];
 
 const RULE =
-  "One mark serves the whole ecosystem. The seed row never changes between arms: six counters from the okwe " +
+  "One mark serves the whole business. The seed row never changes between marks: six counters from the okwe " +
   "board, three sown in sulphur, three open. OKWE is always set in Archivo at 125% width — the expansion is " +
-  "the identity. An arm is one qualifier word in muted ink, beside the wordmark or beneath it; the parent, " +
-  "Okwe, is the wordmark alone, and the absence of a word is what makes it the parent. Arms are never " +
-  "differentiated by colour: verdigris and stamp red already carry meanings, and sulphur never carries type. " +
-  "If you cannot tell two arms apart in greyscale, the lockup is wrong.";
+  "the identity. A process — Knows, Coms or Move — is one qualifier word in muted ink, beside the wordmark or " +
+  "beneath it; the parent, Okwe, is the wordmark alone, and the absence of a word is what makes it the parent. " +
+  "Okwe Knowledge, the publishing imprint of Okwe Knows, follows the same rule with its own word. Marks are " +
+  "never differentiated by colour: verdigris and stamp red already carry meanings, and sulphur never carries " +
+  "type. If you cannot tell two marks apart in greyscale, the lockup is wrong.";
 
 /**
- * Every file for one brand. The five lockups are the same five geometry for all
- * four; only the qualifier word (and its absence) changes.
+ * Every file for one mark. The five lockups are the same five geometry for
+ * every mark; only the qualifier word (and its absence) changes.
  */
-function buildBrand({ name, arm, prefix }) {
-  const word = arm ? ARM_WORD[arm] : null;
+function buildBrand({ name, arm, word: imprintWord, prefix }) {
+  const word = imprintWord ?? (arm ? ARM_WORD[arm] : null);
   const full = word ? `Okwe ${word}` : "Okwe";
   const out = [];
 
@@ -350,7 +372,7 @@ function avatarSvg(size, { word = null, name = "Okwe" } = {}) {
   const top = (size - blockH) / 2;
   const base = top + seed + gap + font * 0.78;
   // On the plate the qualifier takes cyanotype-300, the same muted step the
-  // inverse lockup uses. Still not a per-arm colour: every arm gets this one.
+  // inverse lockup uses. Still not a per-mark colour: every mark gets this one.
   const qualifier = word
     ? `\n    <text class="word" x="${size / 2}" y="${(base + qFont * 1.02).toFixed(1)}" font-size="${qFont.toFixed(1)}" fill="${MUTED_INVERSE}" text-anchor="middle">${word}</text>`
     : "";
@@ -432,10 +454,10 @@ const png = async (svgStr, w, h, name) => {
   console.log(`  ${name.padEnd(34)} ${buf.length}B  ${w}x${h}`);
 };
 
-/* Each arm gets its own touch icon and its own 512: the avatar is the one place
+/* Each mark gets its own touch icon and its own 512: the avatar is the one place
    the qualifier is still legible at icon size. */
 for (const { brand } of brandEntries) {
-  const word = brand.arm ? ARM_WORD[brand.arm] : null;
+  const word = brand.word ?? (brand.arm ? ARM_WORD[brand.arm] : null);
   const art = avatarSvg(512, { word, name: brand.name });
   await png(art, 180, 180, `${brand.prefix}apple-touch-icon.png`);
   await png(art, 512, 512, `${brand.prefix}icon-512.png`);
@@ -471,6 +493,7 @@ const logoManifest = {
   brands: brandEntries.map(({ brand, lockups }) => ({
     id: brand.id,
     name: brand.name,
+    kind: brand.kind,
     arm: brand.arm,
     note: brand.note,
     lockups: lockups.map((l) => ({

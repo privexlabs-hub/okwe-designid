@@ -30,7 +30,9 @@ notation — no runtime, no backend, no third-party requests.
 | `/content-proofs` | `content-proofs/Proofs.jsx` | The twelve proofs, with a working plate-mode switch and a jump index. |
 | `/carousel` | `carousel/SocialCarousel.dc.html` | The six-part set at 1080×1350, editable in place and exportable. |
 | `/register` | `content-playbook` (04) | The question register — *"the most valuable file in the company"*. Five documented fields, priority = frequency × cost of getting it wrong, promote-a-question-into-a-draft. |
-| `/brand` | derived from the design system's own rules | Every mark for the four arms — Okwe, Okwe Knowledge, Okwe Comms, Okwe Move — with the rule that governs them. SVG masters, PNG at 1×/2×/3×, PDF, app icons, watermarks, and a kit ZIP. |
+| `/brand` | derived from the design system's own rules | Every mark — Okwe, its three processes Okwe Knows, Okwe Coms and Okwe Move, and the Okwe Knowledge imprint — with the rule that governs them. SVG masters, PNG at 1×/2×/3×, PDF, app icons, watermarks, and a kit ZIP. |
+| `/guidelines` | the token CSS, the playbook, and the owner's business document | The brand guidelines in twelve sections — Overview, Logo, Colour, Type, Spacing, Radius & shadow, Motif, Voice, Components, Slides, UI kits, Governance. Every value is read from the tokens at build. |
+| `/context` | derived from the playbook and the code that enforces it | The brand as plain Markdown — eleven sections, each copyable on its own, downloadable as one file. Built to be pasted into a model. |
 | `/design-system` | `_ds/…/_ds_bundle.js` | Every component on one specimen sheet, so consistency is checked rather than assumed. Includes the five colour ramps (hex read back from the live custom properties), the type scale, a width-contrast specimen, and a plate-mode block. |
 
 ## How it is built
@@ -206,45 +208,154 @@ Three new data cards complete the `DAT` domain, each composed on `PostCanvas` li
 `ComparisonCard` (two tallies, ink versus sulphur), `RankCard` (numbered rows, capped at eight) and
 `TimelineCard` (one hairline, square-ended ticks, capped at six). No arrows, no curves, no dots.
 
-## The four arms
+## Article banners
 
-The ecosystem has four marks: **Okwe** (the parent), **Okwe Knowledge**, **Okwe Comms** and
-**Okwe Move**. The source documents none of this — it names only "Okwe Knowledge" and mentions the
-triad *"Knowledge → Commerce → Movement"* exactly once, inside a *rejected* visual territory. So the
-arm system is **derived from rules the design system does state**, not invented:
+The post editor renders `OKW-EDI-ARTICLE-01`, the playbook's *"Article header — call number,
+headline, lede, class stamps"*, which until now was listed as documented but not rendered. Pick
+**Article header** under the rail's **Editorial** chip, type the headline and subtitle once, and the
+same design leaves in four sizes:
 
-> One mark serves the whole ecosystem. The seed row never changes: six counters, three sown, three
-> open. OKWE is always Archivo at 125% width. An arm is one qualifier word in muted ink; the parent
-> is the wordmark alone. **Arms are never differentiated by colour.**
+| Size | Use | Where the number comes from |
+| --- | --- | --- |
+| 1920×1080 | LinkedIn article / newsletter cover | LinkedIn Help, *Cover images in articles* |
+| 1200×630 | Share card — site Open Graph, LinkedIn and X link previews | LinkedIn Help (1.91:1); the brand's own share card is already 1200×630 |
+| 1500×600 | X article header | X recommends 5:2 for an article image; 1500 is the width the X header canvas already uses |
+| 1600×900 | X in-post image · Medium header | the playbook's X size (`OKW-SOC-X-INSIGHT-01`); meets Medium Help's ≥1400px wide, 16:9 |
+| 1080×1080 | Feed post | the playbook's feed square |
 
-No arm colour, because nothing is left unclaimed: verdigris is bound to `--class-interpretation`,
+The playbook gives no article pixel sizes, so these are the platforms' own. X states 5:2 for an
+article image, which 1500×600 hits exactly. For link previews X's card documentation could not be
+retrieved; secondary guides give 2:1, and a 2:1 crop of the share card removes about 15px top and
+bottom — inside the canvas margin.
+
+**The mark is the register foot**, as on every canvas: six seeds and the wordmark. The foot names
+the mark — Okwe Knowledge by default, or Okwe Knows, Okwe Coms, Okwe Move, or the parent Okwe alone — through a
+new `brand` prop on `PostCanvas` that defaults to Knowledge, so every existing canvas is unchanged.
+The destination is an editable field defaulting to `okweknowledge.com`, because that is the only
+documented domain; the other arms' addresses are typed, not guessed.
+
+**Type is set per size** (`ARTICLE_TYPE` in `ArticleCard.tsx`) rather than scaled by width, because a
+1200×630 sheet is wide but short. `LEDE_FIT` is the longest subtitle measured to fit the share card
+beside a 62-character headline; the Inspector shows it the way it shows the headline's 62 — a layout
+limit, not a brand rule. `verify-additions.mjs` measures the headline and subtitle against the index
+band and the register foot at every size.
+
+**Export** takes any size or all of them, in PNG, JPG, PDF or SVG at 1× or 2×, one by one or as a
+ZIP. Files keep the documented pattern and gain the size, so four sizes never overwrite each other:
+`okwe-knowledge-the-trade-desk-what-landed-cost-includes-slide-01-1200x630.png`. Every other
+template's names are unchanged.
+
+One guard was also made real. `SlideArt`'s dispatch claimed a `never` check, but it was an
+`Exclude<>` followed by an `as` cast that accepted anything — a new slide kind would have rendered
+silently as a carousel slide. It now narrows through the early returns and assigns to
+`CarouselSlideKind` with no cast, so an unhandled kind fails `tsc`.
+
+## The context pack
+
+`/context` answers a question the rest of the app could not: how do you get the brand *out*?
+
+The six playbook documents are stored as pre-rendered HTML and injected into `/playbook` with
+`dangerouslySetInnerHTML` — readable, but not portable. The rules that actually *enforce* the brand
+were worse off: the ten-criterion gate, the banned vocabulary, the source-line rule, the template
+codes, the profiles and the question register existed only as TypeScript, rendered as UI controls
+and never as prose. There was no Markdown serialisation anywhere in the repo.
+
+The pack is a **projection, not a document**. Eleven sections: six are the playbook converted, five
+are the code, and two — `00 · Start here` and `10 · Tasks` — are the only new prose in the feature.
+Nothing is summarised or rewritten, and every section prints the source it came from, because a
+brand whose first rule is *"show where you got it"* cannot ship an unsourced brief.
+
+Two sections carry an honesty flag rather than laundering a local decision into fact: the arm rule
+says the source documents no sub-brand marks, and the question register's cost scale says the
+playbook defines no scale, so that one is ours. Both disclosures already exist in the code
+(`geometry.ts`, `register.ts:14`); the pack repeats them.
+
+`src/lib/markdown.ts` is a tokeniser, not a parser, and the corpus earns it: scanned end to end it
+is well-formed, nests lists and tables no deeper than one, and contains no `<br>`, no entities, no
+attributes but heading `id`s, and not one cell with a literal `|`. It is **pure string in, string
+out** — no `DOMParser`, because client components are prerendered by `next build` in Node, where
+`DOMParser` does not exist, and a DOM-based converter would ship a blank page under
+`output: "export"`. It throws on any tag it does not handle, and `verify-additions.mjs` reads
+`SUPPORTED_TAGS` back out of the file as text to check the corpus against it — the same
+read-the-constant-from-source trick the logo generator uses on `geometry.ts`.
+
+One rule is easy to get wrong and is worth stating: a table and a list are each **one block whose
+lines are joined by a single newline**, and blocks are joined by a blank line. Separate a header row
+from its delimiter with a blank line and it stops being a table and becomes a column of pipes. A
+check pins it.
+
+The whole pack is ~60,500 characters, roughly 15,000 tokens. Section 06, the visual thesis, is
+nearly a third of that and is the first to drop when you are writing rather than designing — which
+is why sections are individually selectable rather than one blob.
+
+## Okwe, its processes and the imprint
+
+The business is **Okwe Import Export Solutions** — in the owner's words, "an integrated trade and
+logistics business focused on facilitating the movement of goods from opportunity to destination",
+run through three processes that "are not separate businesses": **Okwe Knows** (knowledge &
+intelligence), **Okwe Coms** (communication & commerce) and **Okwe Move** (movement & logistics).
+Know → Coms → Move. The document lives verbatim in `src/content/business.ts`.
+
+**Okwe Knowledge is kept** as the publishing imprint of Okwe Knows. The playbook, okweknowledge.com,
+the social handles and the documented export names all carry it, so none of them was rewritten; the
+imprint simply stops being counted as a process.
+
+There are five marks: **Okwe** (the parent), the three processes, and the imprint. The playbook
+documents no sub-brand marks, so the rule is **derived from what the design system does state**:
+
+> One mark serves the whole business. The seed row never changes between marks. OKWE is always
+> Archivo at 125% width. A process is one qualifier word in muted ink; the parent is the wordmark
+> alone. **Marks are never differentiated by colour.**
+
+No process colour, because nothing is left unclaimed: verdigris is bound to `--class-interpretation`,
 `--status-success` and `--data-3`; stamp red to `--class-opinion` and `--status-danger`; sulphur
-never carries type. An arm coloured verdigris would read as "interpretation" wherever the two met.
-The arms are told apart by the word, as the call number tells content apart.
+never carries type. A process coloured verdigris would read as "interpretation" wherever the two met.
 
-`Logo` gained one prop, `arm?: LogoArm` — a closed union, not free text. It takes precedence over
-`knowledge`, which still works, so all fourteen existing call sites render unchanged. The `avatar`
-variant reads `arm` **only**: `knowledge` defaults to `true`, so reading the resolved qualifier
-there would make every existing `<Logo variant="avatar"/>` sprout a second line.
+In code the processes are `LOGO_ARMS = ["knows", "coms", "move"]` — a closed union, not free text —
+and one helper, `brandWord()` in `geometry.ts`, names every mark, so the register foot, the export
+file prefix and the editor's mark picker cannot disagree. `Logo`'s `knowledge` prop is the imprint;
+its fourteen existing call sites render unchanged, and so does every canvas foot and every
+`okwe-knowledge-…` file name.
 
 ### The assets
 
-`npm run assets:logo` emits **34 files (~2.7 MB)** into `public/assets/logo/` plus
-`logo.manifest.json`, which `/brand` imports at build time — so the page can never list a file that
-was not written. 20 vector masters (4 arms × stacked, stacked-inverse, horizontal, wordmark,
-avatar), 8 app icons, a shared favicon, two watermarks and the OG pair.
+`npm run assets:logo` emits **41 files (3.4 MB)** into `public/assets/logo/`, manifest
+included, which `/brand` imports at build time — so the page can never list a file that was not
+written. 35 brand files (5 marks × stacked, stacked-inverse, horizontal, wordmark, avatar,
+and two app icons each), a shared favicon, two watermarks and the OG pair. The superseded Comms
+files were removed when the mark was renamed to Coms.
 
 **The favicon is shared.** At 16px a qualifier is unreadable, and an unreadable word is noise; the
-180 and 512 icons have room to name their arm, so they do.
+180 and 512 icons have room to name their mark, so they do.
 
 **The watermark** is the seed row alone in a real tint step (`--cyanotype-100` on chalk,
 `--cyanotype-800` on the plate) — no opacity and no alpha, so it composites flat over any ground,
 and no sulphur, because sulphur never sits behind text.
 
 Rasters are **not** pre-generated. PNG at 1×/2×/3× and PDF are rendered in the browser from the live
-`<Logo>` you are looking at, via the export library that already existed. Pre-generating them would
-be 100 files and 5.3 MB instead of 34 and 2.7 MB. The SVG download serves the **master file** rather
-than `toSvgString`, which wraps the DOM in a `foreignObject` — a screenshot in SVG clothing.
+`<Logo>` you are looking at, via the export library that already existed. The SVG download serves
+the **master file** rather than `toSvgString`, which wraps the DOM in a `foreignObject` — a
+screenshot in SVG clothing.
+
+## Brand guidelines
+
+`/guidelines` covers the twelve sections the owner named. It is a projection, like `/context`:
+**values are read from the token CSS at build** (`src/lib/tokens.ts`, from a server component), so a
+changed token changes the page, and the words live in `src/content/guidelines.ts`, each with its
+source.
+
+- **Colour** shows every step of every ramp with the aliases that point at it, every alias with its
+  plate value, and WCAG 2.1 contrast computed from the hex (`src/lib/contrast.ts`). The five states —
+  info, success, warning, error, highlight — map to real tokens; error is `--status-danger`, and
+  highlight has no token because it is sulphur's marking role. Whether a status token is used is
+  **measured** at build, not asserted: today only `--status-danger` is.
+- **The arithmetic corrected one number.** The visual thesis says "cyanotype-800 on chalk-100 =
+  13.9:1"; computed, it is 12.2:1. The playbook stays verbatim and the page states both.
+- **The arithmetic also explains two rules.** Sulphur-400 on chalk measures about 1.3:1, which is why
+  sulphur never carries text. `--status-warning` (sulphur-600) measures 3.3:1, enough for large text
+  and marks but not body text, so the page says body-size warning text stays in ink.
+- **Gaps are stated, not filled**: no clear-space rule exists, and the "1px optical relief on inputs"
+  the radius comment mentions is not implemented.
 
 ## Known limits
 

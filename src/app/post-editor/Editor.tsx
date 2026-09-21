@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dialog } from "@/design-system/components/core/Dialog";
 import { CANVASES } from "@/design-system/components/social/PostCanvas";
+import type { CanvasName } from "@/design-system/components/social/PostCanvas";
 import { TEMPLATES } from "@/content/templates";
 import type {
   EditorDoc,
@@ -18,7 +19,8 @@ import { TemplateRail } from "./TemplateRail";
 import { TopBar } from "./TopBar";
 import { DownloadControl } from "@/components/DownloadControl";
 import type { ExportTarget } from "@/lib/export";
-import { baseName, slideName } from "./naming";
+import { assetName, baseName } from "./naming";
+import { activeCanvas } from "./canvas";
 import { DraftsDialog } from "./DraftsDialog";
 import { useAutosave } from "@/lib/useAutosave";
 import { HANDOFF_KEY, readAutosave, readOnce, saveDraft } from "@/lib/store";
@@ -73,7 +75,7 @@ const START: EditorDoc = {
 
 /** Theme a freshly templated slide takes, by kind. */
 function themeFor(kind: SlideKind) {
-  if (kind === "cover" || kind === "thumb") return "plate" as const;
+  if (kind === "cover" || kind === "thumb" || kind === "article") return "plate" as const;
   if (kind === "cta") return "mark" as const;
   // The source wrote `k === "chalk"` here — comparing a slide *kind* against a
   // *theme* name, which is never true and left the theme undefined. The intent
@@ -93,6 +95,14 @@ export function Editor() {
   const registerNode = useCallback((i: number, node: HTMLDivElement | null) => {
     nodes.current[i] = node;
   }, []);
+  /** Offscreen copies at every size except the active one, keyed "canvas:index". */
+  const sizeNodes = useRef<Record<string, HTMLDivElement | null>>({});
+  const registerSizeNode = useCallback(
+    (i: number, canvas: CanvasName, node: HTMLDivElement | null) => {
+      sizeNodes.current[`${canvas}:${i}`] = node;
+    },
+    [],
+  );
   const getNodes = useCallback(
     () => nodes.current.slice(0, doc.slides.length),
     [doc.slides.length],
@@ -107,10 +117,23 @@ export function Editor() {
     (i: number): ExportTarget | null => {
       const node = nodes.current[i];
       if (!node) return null;
-      const spec = CANVASES[doc.template.canvas];
-      return { node, width: spec.w, height: spec.h, name: slideName(doc, i) };
+      const canvas = activeCanvas(doc);
+      const spec = CANVASES[canvas];
+      return { node, width: spec.w, height: spec.h, name: assetName(doc, i, canvas) };
     },
     [doc],
+  );
+
+  /** One slide at a named size — the active size uses the node above. */
+  const targetForSize = useCallback(
+    (i: number, canvas: CanvasName): ExportTarget | null => {
+      if (canvas === activeCanvas(doc)) return targetFor(i);
+      const node = sizeNodes.current[`${canvas}:${i}`];
+      if (!node) return null;
+      const spec = CANVASES[canvas];
+      return { node, width: spec.w, height: spec.h, name: assetName(doc, i, canvas) };
+    },
+    [doc, targetFor],
   );
 
   const set = (patch: Partial<EditorDoc>) =>
@@ -182,7 +205,9 @@ export function Editor() {
             : undefined,
       }));
       nodes.current = [];
-      return { ...d, template: t, slides, active: 0 };
+      sizeNodes.current = {};
+      // A size belongs to a template; never carry one across.
+      return { ...d, template: t, slides, active: 0, size: undefined };
     });
 
   /**
@@ -249,7 +274,7 @@ export function Editor() {
     window.setTimeout(() => setSaved(false), 2400);
   };
 
-  const previewWidth = Math.round(CANVASES[doc.template.canvas].w * 0.4);
+  const previewWidth = Math.round(CANVASES[activeCanvas(doc)].w * 0.4);
 
   return (
     <div className={styles.shell}>
@@ -285,6 +310,7 @@ export function Editor() {
           <Stage
             doc={doc}
             slide={slide}
+            onSize={(size) => set({ size })}
             action={
               <DownloadControl
                 label={`slide ${String(doc.active + 1).padStart(2, "0")}`}
@@ -307,7 +333,7 @@ export function Editor() {
       </div>
 
       {/* Laid out offscreen so every slide can be captured, not just the active one. */}
-      <StagingArea doc={doc} registerNode={registerNode} />
+      <StagingArea doc={doc} registerNode={registerNode} registerSizeNode={registerSizeNode} />
 
       {previewing && (
         <Dialog
@@ -334,6 +360,7 @@ export function Editor() {
           onClose={() => setExporting(false)}
           getNodes={getNodes}
           targetFor={targetFor}
+          targetForSize={targetForSize}
         />
       )}
 

@@ -132,8 +132,8 @@ export function AssetRow({ brand, lockup, compact, register }: AssetRowProps) {
           <Logo
             variant={lockup.variant}
             tone={lockup.tone}
-            arm={brand.arm ?? undefined}
-            knowledge={false}
+            arm={brand.kind === "process" ? (brand.arm ?? undefined) : undefined}
+            knowledge={brand.kind === "imprint"}
             size={specimenSize(lockup.variant, compact)}
           />
         </div>

@@ -1,0 +1,764 @@
+/* OKW-GUIDE-01 — the brand guidelines, laid out as a ledger.
+   Breakpoint literals mirror the tokens in design-system/tokens/breakpoints.css
+   (custom properties cannot be read inside @media):
+     --bp-lg 1100px · --bp-md 860px · --bp-sm 600px
+   Rules, not boxes: no shadow, no radius, no card border. Wide tables scroll in
+   their own .okwe-scroll-x box, never the page. */
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--space-9) var(--page-margin-fluid) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  border-bottom: var(--rule-thick) solid var(--rule-ink);
+  padding-bottom: var(--space-7);
+}
+
+.back {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow {
+  font: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.lede {
+  font: var(--type-lede);
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+}
+
+/* ---- The index: twelve anchors, ruled, three columns folding to one. ---- */
+.index {
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+}
+
+.indexList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--space-7);
+}
+
+.indexLink {
+  display: flex;
+  gap: var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-bottom: var(--rule-thin) solid var(--rule-quiet);
+  font: var(--type-ui);
+  color: var(--text-primary);
+}
+
+.indexLink:hover {
+  border-bottom-color: var(--rule-mark);
+}
+
+.indexNum {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  color: var(--text-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Sections ---- */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding-top: var(--space-6);
+  scroll-margin-top: var(--space-6);
+  min-width: 0;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+}
+
+.num {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  color: var(--text-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+.h2 {
+  font-size: var(--size-3xl);
+  margin: 0;
+}
+
+.lead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--measure-body);
+}
+
+.sub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.h3 {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: var(--rule-thin) solid var(--rule-quiet);
+}
+
+.h4 {
+  font: var(--type-h4);
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.prose {
+  font: var(--type-body);
+  color: var(--text-body);
+  max-width: var(--measure-body);
+  margin: 0;
+}
+
+.note {
+  font: var(--type-caption);
+  color: var(--text-muted);
+  max-width: var(--measure-body);
+  margin: 0;
+}
+
+.source {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-call);
+  color: var(--text-quiet);
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.quiet {
+  color: var(--text-quiet);
+}
+
+.rule {
+  font: var(--type-lede);
+  color: var(--text-body);
+  max-width: var(--measure-body);
+  margin: 0;
+  border-left: var(--rule-thick) solid var(--rule-mark);
+  padding-left: var(--space-5);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+/* ---- Rule lists: a rule, then its source in the margin. ---- */
+.rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ruleRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 14rem);
+  gap: var(--space-5);
+  padding: var(--space-3) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  align-items: baseline;
+}
+
+.ruleText {
+  font: var(--type-body-sm);
+  color: var(--text-body);
+}
+
+.list,
+.activities {
+  margin: 0;
+  padding-left: var(--space-6);
+  font: var(--type-body-sm);
+  color: var(--text-body);
+}
+
+/* ---- Overview ---- */
+.journey {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display-max);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-3xl);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stepRow {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  align-items: baseline;
+}
+
+.stepTitle {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.stepBody {
+  font: var(--type-body-sm);
+  color: var(--text-body);
+}
+
+.processes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-7);
+}
+
+.process {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding-top: var(--space-5);
+  min-width: 0;
+}
+
+.processRole,
+.kind {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.purpose {
+  font: var(--type-body-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+  border-left: var(--rule-thick) solid var(--rule-mark);
+  padding-left: var(--space-4);
+  margin: 0;
+}
+
+.umbrella {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display-max);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-xl);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.archRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: var(--rule-thin) solid var(--rule-ink);
+}
+
+.archCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  min-width: 0;
+}
+
+.archCell + .archCell {
+  border-left: var(--rule-thin) solid var(--rule-quiet);
+  padding-left: var(--space-4);
+}
+
+.archName {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display-max);
+  font-weight: var(--weight-bold);
+  font-size: var(--size-md);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.archRole {
+  font: var(--type-caption);
+  color: var(--text-muted);
+}
+
+.promise,
+.formula {
+  font: var(--type-h4);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ---- Logo ---- */
+.marks {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+.mark {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+  min-width: 0;
+}
+
+.markSpecimens {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+
+.markInk,
+.inkCell {
+  background: var(--surface-ink);
+}
+
+.markInk {
+  display: inline-flex;
+}
+
+.markName {
+  font: var(--type-h4);
+  color: var(--text-primary);
+}
+
+/* ---- Tables ---- */
+.tableWrap {
+  border-top: var(--rule-thin) solid var(--rule-ink);
+}
+
+.tableWrap:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--type-body-sm);
+  color: var(--text-body);
+}
+
+.table th {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  vertical-align: top;
+}
+
+.inkCell {
+  padding-left: var(--space-3) !important;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  border: var(--rule-thin) solid var(--rule-quiet);
+  margin-right: var(--space-2);
+}
+
+.grade {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.grade b {
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin-left: var(--space-2);
+}
+
+.gradeFail b {
+  color: var(--status-danger);
+}
+
+.aliasList {
+  font: var(--type-data);
+  font-stretch: var(--stretch-mono);
+  color: var(--text-muted);
+  min-width: 12rem;
+}
+
+/* Specimens are never clipped: a wide one scrolls inside the table's own
+   .okwe-scroll-x box. Hiding overflow here once cut a 124px figure off by
+   1,300px while the page reported nothing wrong. */
+.sampleCell {
+  white-space: nowrap;
+}
+
+/* ---- Colour ---- */
+.roles {
+  display: flex;
+  flex-direction: column;
+}
+
+.roleRow {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  gap: var(--space-6);
+  padding: var(--space-5) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+}
+
+.roleStrip {
+  display: flex;
+  height: 48px;
+  border: var(--rule-thin) solid var(--rule-quiet);
+}
+
+.roleStrip span {
+  flex: 1;
+}
+
+.roleBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.roleName {
+  font: var(--type-h4);
+  color: var(--text-primary);
+}
+
+.quoteLine {
+  font: var(--type-body-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+  max-width: var(--measure-body);
+  margin: 0;
+}
+
+.ramp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.states {
+  display: flex;
+  flex-direction: column;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  min-width: 0;
+}
+
+.stateHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: baseline;
+}
+
+.stateLabel {
+  font: var(--type-h3);
+  color: var(--text-primary);
+}
+
+.carrier {
+  margin-right: var(--space-4);
+  white-space: nowrap;
+}
+
+.stateExample {
+  font: var(--type-body);
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: baseline;
+}
+
+.tabMark {
+  font: var(--type-ui);
+  color: var(--text-primary);
+  border-bottom: var(--rule-thick) solid var(--rule-mark);
+  padding-bottom: var(--space-1);
+}
+
+.stateFacts {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  font: var(--type-body-sm);
+  color: var(--text-body);
+}
+
+.stateFacts dt {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-top: 3px;
+}
+
+.stateFacts dd {
+  margin: 0;
+}
+
+.caution {
+  color: var(--text-primary);
+}
+
+/* ---- Type ---- */
+.widths {
+  display: flex;
+  flex-direction: column;
+}
+
+.widthRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  min-width: 0;
+}
+
+.widthSample {
+  font-size: var(--size-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Spacing ---- */
+.spaces {
+  display: flex;
+  flex-direction: column;
+}
+
+.spaceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 4rem) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+}
+
+.spaceBar {
+  display: block;
+  height: 8px;
+  max-width: 100%;
+  background: var(--surface-ink);
+}
+
+/* ---- Motif ---- */
+.devices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-7);
+}
+
+.device {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+  min-width: 0;
+}
+
+.deviceWide {
+  grid-column: span 2;
+}
+
+.deviceName {
+  font: var(--type-h4);
+  color: var(--text-primary);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ---- Quotes from the playbook ---- */
+.quote {
+  max-width: var(--measure-body);
+}
+
+.quote :global(table) {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* ---- Slides and kits ---- */
+.slides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.kits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-7);
+}
+
+.kit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: var(--rule-thick) solid var(--rule-ink);
+  padding-top: var(--space-5);
+  min-width: 0;
+}
+
+.kitName {
+  font: var(--type-h3);
+  color: var(--text-primary);
+}
+
+.foot {
+  font: var(--type-label);
+  font-stretch: var(--stretch-mono);
+  letter-spacing: var(--tracking-label);
+  color: var(--text-muted);
+  border-top: var(--rule-thin) solid var(--rule-quiet);
+  padding-top: var(--space-5);
+  overflow-wrap: anywhere;
+}
+
+/* ----------------------------------------------------------- responsive ---- */
+
+/* --bp-lg: 1100px — five marks become three; the source margin folds under. */
+@media (max-width: 1100px) {
+  .marks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ruleRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}
+
+/* --bp-md: 860px — two-column grids stack; the index runs two across. */
+@media (max-width: 860px) {
+  .grid2,
+  .kits,
+  .processes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .indexList,
+  .marks,
+  .devices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .deviceWide {
+    grid-column: 1 / -1;
+  }
+  .h2 {
+    font-size: clamp(23px, 5.4vw, var(--size-3xl));
+  }
+  .journey {
+    font-size: clamp(23px, 6vw, var(--size-3xl));
+  }
+}
+
+/* --bp-sm: 600px — one column everywhere. */
+@media (max-width: 600px) {
+  .indexList,
+  .marks,
+  .devices,
+  .archRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .archCell + .archCell {
+    border-left: 0;
+    border-top: var(--rule-thin) solid var(--rule-quiet);
+    padding-left: 0;
+  }
+  .stepRow,
+  .roleRow,
+  .stateFacts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+  .spaceRow {
+    grid-template-columns: minmax(0, 7rem) minmax(0, 3rem) minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+}

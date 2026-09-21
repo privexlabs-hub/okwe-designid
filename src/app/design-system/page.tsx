@@ -20,6 +20,7 @@ import { StatBlock } from "@/design-system/components/editorial/StatBlock";
 import { CANVASES, PostCanvas } from "@/design-system/components/social/PostCanvas";
 import { CarouselSlide } from "@/design-system/components/social/CarouselSlide";
 import { StatCard } from "@/design-system/components/social/StatCard";
+import { ArticleCard } from "@/design-system/components/social/ArticleCard";
 import { ThumbnailCard } from "@/design-system/components/social/ThumbnailCard";
 
 import { ColourRamps } from "./Foundations";
@@ -605,7 +606,7 @@ export default function DesignSystemPage() {
           <Specimen
             index="06.1"
             name="PostCanvas"
-            note={`Eight canvases, each a fixed ratio: ${Object.entries(CANVASES)
+            note={`Ten canvases, each a fixed ratio: ${Object.entries(CANVASES)
               .map(([k, v]) => `${k} ${v.w}×${v.h}`)
               .join(" · ")}. Rendered here at a reduced width.`}
           >
@@ -752,6 +753,89 @@ export default function DesignSystemPage() {
                   duration="14:02"
                   question="This question is pushed out of the card."
                   renderWidth={300}
+                />
+              </Variant>
+            </div>
+          </Specimen>
+
+          <Specimen
+            index="06.5"
+            name="ArticleCard"
+            note="OKW-EDI-ARTICLE-01 — call number, headline, lede, class stamp. One design at five sizes; type is set per size, and the register foot names the mark."
+          >
+            <div style={row}>
+              <Variant name="slide · 1920×1080 · LinkedIn article">
+                <ArticleCard
+                  canvas="slide"
+                  series="The Trade Desk"
+                  issue={14}
+                  date="2026-09-15"
+                  classMark="Explainer"
+                  title="What landed cost actually includes"
+                  lede="The invoice is the first line of the price, not the price."
+                  renderWidth={320}
+                />
+              </Variant>
+              <Variant name="share · 1200×630 · link previews">
+                <ArticleCard
+                  canvas="share"
+                  series="The Trade Desk"
+                  issue={14}
+                  date="2026-09-15"
+                  classMark="Explainer"
+                  title="What landed cost actually includes"
+                  lede="The invoice is the first line of the price, not the price."
+                  renderWidth={320}
+                />
+              </Variant>
+              <Variant name="landscape · 1600×900 · X, Medium">
+                <ArticleCard
+                  canvas="landscape"
+                  series="The Trade Desk"
+                  issue={14}
+                  date="2026-09-15"
+                  classMark="Explainer"
+                  title="What landed cost actually includes"
+                  lede="The invoice is the first line of the price, not the price."
+                  renderWidth={320}
+                />
+              </Variant>
+              <Variant name="square · 1080×1080 · feed">
+                <ArticleCard
+                  canvas="square"
+                  series="The Trade Desk"
+                  issue={14}
+                  date="2026-09-15"
+                  classMark="Explainer"
+                  title="What landed cost actually includes"
+                  lede="The invoice is the first line of the price, not the price."
+                  renderWidth={240}
+                />
+              </Variant>
+              <Variant name="wide · 1500×600 · X article">
+                <ArticleCard
+                  canvas="wide"
+                  series="The Trade Desk"
+                  issue={14}
+                  date="2026-09-15"
+                  classMark="Explainer"
+                  title="What landed cost actually includes"
+                  lede="The invoice is the first line of the price, not the price."
+                  renderWidth={320}
+                />
+              </Variant>
+              <Variant name="chalk · Okwe Coms">
+                <ArticleCard
+                  canvas="share"
+                  theme="chalk"
+                  brand="coms"
+                  series="Field Notes"
+                  issue={3}
+                  date="2026-09-15"
+                  classMark="Field note"
+                  title="Why your container waits at the port"
+                  lede="Two shipments, measured from berth to gate."
+                  renderWidth={320}
                 />
               </Variant>
             </div>

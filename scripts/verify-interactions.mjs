@@ -83,7 +83,7 @@ const kbd = await ev(`(() => {
   return { count: links.length, focused: f.tagName + ":" + (f.getAttribute("href")||""),
            outlineColor: cs.outlineColor, outlineWidth: cs.outlineWidth };
 })()`);
-check(kbd.count === 8, `eight register entries are focusable links (${kbd.count})`);
+check(kbd.count === 10, `ten register entries are focusable links (${kbd.count})`);
 check(kbd.focused.startsWith("A:"), `tab lands on a real link (${kbd.focused})`);
 
 const ring = await ev(`getComputedStyle(document.documentElement).getPropertyValue("--focus-ring-width").trim()`);
